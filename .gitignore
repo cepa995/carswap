@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# env files (commit .env.example only)
+.env*
+!.env.example
+
+# tooling
+.vercel
+.turbo
+playwright-report/
+test-results/
+
+# os / editors
+.DS_Store
+*.pem
+npm-debug.log*
+.pnpm-debug.log*
+
+# Private planning notes. This repository is public: keep strategy documents
+# out of git unless you decide to publish them.
+/Car swap app deep dive.md
+
+# Downloads cached by scripts/seed-photos/build.py
+scripts/seed-photos/.cache/
