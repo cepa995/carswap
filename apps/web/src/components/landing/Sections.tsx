@@ -19,12 +19,29 @@ import { SectionHeading } from "./SectionHeading";
 
 export function SiteHeader() {
   return (
-    <header className="absolute inset-x-0 top-0 z-20">
-      <div className="mx-auto box-content flex h-16 max-w-7xl items-center justify-between px-5 pt-safe lg:px-8">
+    <header className="absolute inset-x-0 top-0 z-20 pt-safe">
+      {/* The same column as every section below, so the mark stands over the headline. */}
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:h-20 lg:px-8">
         <Link href="/" aria-label={brand.name}>
           <Wordmark />
         </Link>
         <nav className="flex items-center gap-1.5">
+          {/* Down the page, where the screen is wide enough to offer them. */}
+          {(
+            [
+              ["#kako", copy.landing.navHow],
+              ["#zasto", copy.landing.navWhy],
+              ["#pitanja", copy.landing.navFaq],
+            ] as const
+          ).map(([href, label]) => (
+            <a
+              key={href}
+              href={href}
+              className="hidden h-10 items-center rounded-full px-4 text-sm font-semibold text-fg-muted hover:bg-raised hover:text-fg lg:flex"
+            >
+              {label}
+            </a>
+          ))}
           <Link
             href="/garage"
             transitionTypes={["nav-forward"]}
@@ -84,19 +101,14 @@ const faqPieces: Partial<Record<(typeof copy.landing.faq)[number]["key"], ReactN
 
 export function Faq() {
   return (
-    <section className="mx-auto max-w-3xl px-5 py-16 lg:grid lg:max-w-7xl lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:items-start lg:gap-x-16 lg:px-8 lg:py-24">
+    <section
+      id="pitanja"
+      className="mx-auto max-w-3xl scroll-mt-20 px-5 py-16 lg:grid lg:max-w-7xl lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:items-start lg:gap-x-16 lg:px-8 lg:py-24"
+    >
       {/* Stays in view beside the questions while they are read. */}
       <div className="lg:sticky lg:top-24">
         <SectionHeading>{copy.landing.faqTitle}</SectionHeading>
         <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.faqLead}</p>
-        <Link
-          href="/swipe"
-          transitionTypes={["nav-forward"]}
-          className={buttonClass({ size: "lg", className: "mt-7 hidden lg:inline-flex" })}
-        >
-          {copy.landing.ctaDesktop}
-          <ArrowRight className="size-5" aria-hidden />
-        </Link>
       </div>
 
       <div className="mt-8 flex flex-col gap-2.5 lg:mt-0">

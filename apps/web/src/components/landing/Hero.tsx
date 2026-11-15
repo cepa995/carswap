@@ -10,7 +10,6 @@ import { MyCarSheet } from "@/components/car/MyCarSheet";
 import { SwapPreference } from "@/components/car/SwapPreference";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { Button, buttonClass } from "@/components/ui/Button";
-import { ByScreen } from "@/components/ui/ByScreen";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
@@ -79,7 +78,7 @@ export function Hero() {
             {copy.landing.title}
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-pretty text-fg-muted xl:text-xl xl:leading-relaxed">
-            <ByScreen phone={copy.landing.lead} desktop={copy.landing.leadDesktop} />
+            {copy.landing.lead}
           </p>
 
           <div className="mt-8 hidden flex-wrap gap-3 lg:flex">

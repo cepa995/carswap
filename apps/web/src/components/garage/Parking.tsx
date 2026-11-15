@@ -19,7 +19,8 @@ import { createPortal } from "react-dom";
 /** As the gallery card asks for its photo, so the picture in flight is already loaded. */
 export const GALLERY_PHOTO_SIZES = "(min-width: 96rem) 24rem, (min-width: 64rem) 22rem, 92vw";
 
-const FLIGHT_SECONDS = 0.72;
+/** How long a car is on its way to its bay. */
+export const FLIGHT_SECONDS = 0.72;
 /** Where in the flight the car is over the bay and starts backing in. */
 const OVER_THE_BAY = 0.66;
 

@@ -18,6 +18,8 @@ interface GalleryCardProps {
   priority?: boolean;
   /** Just the photo, the name, the deal and the two buttons, for a card shown small. */
   compact?: boolean;
+  /** Without the card's own frame, for showing it inside something that already is one. The photo takes any spare height. */
+  bare?: boolean;
   /** Heading level of the car's name, to fit wherever the card is shown. */
   heading?: "h2" | "h3" | "h4";
   /** Receives the photo's element, which is where a liked car's flight to the garage starts. */
@@ -38,6 +40,7 @@ export function GalleryCard({
   car,
   priority = false,
   compact = false,
+  bare = false,
   heading: Heading = "h2",
   photoRef,
   onOpen,
@@ -62,10 +65,19 @@ export function GalleryCard({
       <PhotoLabels card={card} />
     </>
   );
-  const frame = "group/photo relative block aspect-[3/2] w-full overflow-hidden bg-raised";
+  const frame = cn(
+    "group/photo relative block w-full overflow-hidden bg-raised",
+    bare ? "aspect-[2/1] flex-auto" : "aspect-[3/2]",
+  );
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-[1.75rem] bg-surface shadow-float ring-1 ring-line transition-shadow duration-300 hover:shadow-card">
+    <article
+      className={cn(
+        "flex h-full w-full flex-col",
+        !bare &&
+          "overflow-hidden rounded-[1.75rem] bg-surface shadow-float ring-1 ring-line transition-shadow duration-300 hover:shadow-card",
+      )}
+    >
       {onOpen ? (
         <button
           ref={photoRef}
@@ -82,7 +94,7 @@ export function GalleryCard({
         </div>
       )}
 
-      <div className={cn("flex flex-1 flex-col", compact ? "p-3.5" : "p-4")}>
+      <div className={cn("flex flex-col", bare ? "shrink-0" : "flex-1", compact ? "p-3.5" : "p-4")}>
         <Heading className="font-display text-xl leading-tight font-bold tracking-tight">{name}</Heading>
         {compact ? null : (
           <>

@@ -16,7 +16,7 @@ export const copy = {
   meta: {
     title: "Šta tvoj auto može da postane?",
     description:
-      "Menjaj auto bez oglasa i cenkanja. Reci šta voziš, pa doplati za bolji ili uzmi jeftiniji i ponesi keš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
+      "Menjaj auto bez oglasa i cenkanja. Reci šta voziš, pa doplati za bolji ili uzmi jeftiniji i ponesi keš. Odmah vidiš gde može zamena i koliko sve izađe.",
   },
 
   common: {
@@ -208,6 +208,8 @@ export const copy = {
 
   wizard: {
     title: "Šta voziš?",
+    makeLabel: "Marka",
+    modelLabel: "Model",
     searchMake: "Pretraži marke",
     popular: "Najčešće",
     otherMakes: "Ostale marke",
@@ -251,11 +253,9 @@ export const copy = {
   landing: {
     eyebrow: (city: string) => `Zamena automobila · ${city}`,
     title: "Šta tvoj auto može da postane?",
-    lead: "Reci šta voziš. Doplati za bolji ili uzmi jeftiniji pa ponesi keš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
+    lead: "Menjaj auto bez oglasa i cenkanja. Doplati za bolji ili uzmi jeftiniji i ponesi keš. Koliko, vidiš odmah.",
     // Where two wordings are given, the second is for a big screen: there cars
     // are parked from a gallery, not swiped.
-    leadDesktop:
-      "Reci šta voziš. Doplati za bolji ili uzmi jeftiniji pa ponesi keš. Parkiraj u garažu šta ti se sviđa i odmah vidiš gde može zamena.",
     cta: "Kreni da prevlačiš",
     ctaDesktop: "Pogledaj automobile",
     ctaCar: "Unesi svoj auto",
@@ -275,14 +275,14 @@ export const copy = {
       },
       {
         title: "Skuplji ili jeftiniji?",
-        body: "Za skuplji doplaćuješ, za jeftiniji dobijaš keš. Biraš jednim dodirom.",
+        body: "Za skuplji doplaćuješ, za jeftiniji dobijaš keš. Biraš u jednom potezu.",
       },
       {
         title: "Prevlači",
         body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko sve izađe: doplata, porez, papiri i registracija.",
         desktop: {
           title: "Parkiraj šta ti se sviđa",
-          body: "Menjam parkira auto u tvoju garažu, Dalje ga sklanja. Na svakoj kartici piše koliko sve izađe: doplata, porez, papiri i registracija.",
+          body: "Menjam parkira auto u tvoju garažu. Uz svaki piše koliko sve izađe: doplata, porez, papiri i registracija.",
         },
       },
       {
@@ -293,42 +293,56 @@ export const copy = {
     howEnd: "Ključevi su tvoji.",
     // Under the cards in step three, which are real and can be swiped.
     howTry: "Probaj ovde: prevuci karticu ili dodirni dugme.",
-    howTryDesktop: "Probaj ovde: klikni Menjam.",
+    howTryDesktop: "Klikni Menjam",
     closingSteps: ["Pregled", "Ugovor", "Notar"],
-    // What changing a car through a classified ad is like, and what replaces it here.
+    // Line for line against a classified ad. Ours is the headline of each
+    // line, with a figure that proves it; the ad's way is the small print.
+    // Where `proof` is null the figure is worked out from the example car.
     versusTitle: "Zašto ne oglas?",
     versusLead: "Isti posao, bez onog napornog dela.",
     versusAd: "Preko oglasa",
-    versus: {
-      price: {
-        instead: "Cenkanje u porukama",
-        title: "Cena piše na kartici",
-        body: "Doplatu ili keš vidiš pre nego što bilo koga pozoveš.",
+    versusAdEnd: "I tako nedeljama.",
+    versus: [
+      {
+        key: "price",
+        ad: "„Koja je poslednja cena?“ u svakoj poruci",
+        us: "Doplata piše uz svaki auto",
+        note: "Ili koliko keša dobijaš. Bez cenkanja u porukama.",
+        proof: null,
       },
-      costs: {
-        instead: "Porez i papire saznaš tek na šalteru",
-        title: "Sve ukupno, unapred",
-        body: "Porez, papiri i registracija stoje uz svaki auto.",
+      {
+        key: "costs",
+        ad: "Porez i papire saznaš tek na šalteru",
+        us: "Sve ukupno, unapred",
+        note: "Doplata, porez i papiri zajedno. Registracija piše pored.",
+        proof: null,
       },
-      time: {
-        instead: "Prvo prodaš svoj, pa tek onda kupuješ",
-        title: "Jedan dolazak",
-        body: "Dovezeš svoj, odvezeš drugi. Ne čekaš kupca.",
+      {
+        key: "time",
+        ad: "Prvo prodaš svoj, pa tek onda kupuješ",
+        us: "Dovezeš svoj, odvezeš drugi",
+        note: "Ne čekaš da se tvoj prvo proda.",
+        proof: "1 dolazak",
       },
-      trust: {
-        instead: "Veruješ na reč",
-        title: "Provereno pre potpisa",
-        body: "Istorija vozila, zaloga i lizing proveravaju se pre nego što bilo šta potpišeš.",
+      {
+        key: "trust",
+        ad: "Veruješ na reč",
+        us: "Provereno pre potpisa",
+        note: "Istorija vozila, zaloga i lizing.",
+        proof: "3 provere",
       },
-    },
-    // The messages everyone who has sold a car through an ad has received.
-    versusChat: ["„Koja je poslednja cena?“", "„Može 500 manje? Keš odmah.“", "„Menjaš za Pasata? Ti doplatiš.“"],
-    versusAdSteps: ["Oglas", "Pozivi", "Gledanja", "Cenkanje", "Prodaja", "Traženje", "Kupovina"],
-    versusAdTime: "Traje nedeljama.",
-    versusOurSteps: ["Izabereš", "Dovezeš svoj", "Odvezeš drugi"],
-    // What every ad says about its car.
-    versusClaims: ["„Nije udaran“", "„Garažiran“", "„Prvi vlasnik“", "„Kao nov“"],
-    versusChecks: ["Istorija vozila", "Zaloga", "Lizing"],
+      {
+        key: "effort",
+        ad: "Slikaš, pišeš oglas, čekaš pozive",
+        us: "Bez pisanja oglasa",
+        note: "Uneseš auto i to je sve.",
+        proof: "10 sekundi",
+      },
+    ],
+    // Links in the header on a big screen, to the sections of the page.
+    navHow: "Kako ide",
+    navWhy: "Zašto ne oglas",
+    navFaq: "Pitanja",
     faqTitle: "Česta pitanja",
     faqLead: "Kratko i jasno, bez sitnih slova.",
     faq: [
@@ -345,7 +359,7 @@ export const copy = {
       {
         key: "phone",
         q: "Moram li da ostavim broj telefona?",
-        a: "Za prevlačenje ne. Broj je potreban tek kad zatražiš ponudu.",
+        a: "Za razgledanje ne. Broj je potreban tek kad zatražiš ponudu.",
       },
       {
         key: "dealers",

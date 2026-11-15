@@ -30,6 +30,15 @@ async function touchDrag(page: Page, from: { x: number; y: number }, by: { x: nu
 const widerThanScreen = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
+/** Where each piece of the walkthrough that is on show stands, and how big it is. */
+const pieceBoxes = (page: Page) =>
+  page.locator("#kako [data-piece]:visible").evaluateAll((pieces) =>
+    pieces.map((piece) => {
+      const box = piece.getBoundingClientRect();
+      return { top: Math.round(box.top), width: Math.round(box.width), height: Math.round(box.height) };
+    }),
+  );
+
 async function centreOfTopCard(page: Page) {
   await topCard(page).evaluate((element) => element.scrollIntoView({ block: "center", behavior: "instant" }));
   const box = await topCard(page).boundingBox();
@@ -173,49 +182,80 @@ test.describe("pieces that play as they scroll into view", () => {
   });
 });
 
-test.describe("why not an ad", () => {
-  const section = (page: Page) =>
-    page.locator("section", { has: page.getByRole("heading", { name: "Zašto ne oglas?" }) });
-  const pair = (page: Page, name: string) =>
-    section(page).locator("li", { has: page.getByRole("heading", { level: 3, name }) });
+/** "Zašto ne oglas?": what you get here, line for line against a classified ad. */
+const versus = (page: Page) => page.locator("section", { has: page.getByRole("heading", { name: "Zašto ne oglas?" }) });
+/** One line of it, by what it promises. */
+const line = (page: Page, name: string) =>
+  versus(page).locator("li", { has: page.getByRole("heading", { level: 3, name }) });
+const ours = (page: Page, name: string) => line(page, name).locator('[data-side="ours"]');
+const theirs = (page: Page, name: string) => line(page, name).locator('[data-side="theirs"]');
 
+const PROMISES = [
+  "Doplata piše uz svaki auto",
+  "Sve ukupno, unapred",
+  "Dovezeš svoj, odvezeš drugi",
+  "Provereno pre potpisa",
+  "Bez pisanja oglasa",
+];
+
+test.describe("why not an ad", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
   });
 
-  test("four things an ad makes tiresome, each with what replaces it", async ({ page }) => {
-    await expect(section(page).getByRole("heading", { level: 3 })).toHaveText([
-      "Cena piše na kartici",
-      "Sve ukupno, unapred",
-      "Jedan dolazak",
-      "Provereno pre potpisa",
-    ]);
+  test("five lines, each headed by what you get here", async ({ page }) => {
+    await expect(versus(page).getByRole("heading", { level: 3 })).toHaveText(PROMISES);
   });
 
-  test("the ad's way is set aside and ours lands on top of it", async ({ page }) => {
-    const price = pair(page, "Cena piše na kartici");
-    const ours = price.locator('[data-side="ours"]');
-    await expect(ours).toHaveCSS("opacity", "0");
-
-    await ours.evaluate((element) => element.scrollIntoView({ block: "center", behavior: "instant" }));
-
-    await expect(price.locator('[data-side="theirs"]')).toContainText("Koja je poslednja cena?");
-    await expect(price.locator('[data-side="theirs"]')).toContainText("DALJE");
-    await expect(ours).toHaveCSS("opacity", "1");
-    // Ours is the deal as a card shows it, for a real example.
-    await expect(ours).toContainText(/Golf\s*\+\s*[\d.]+\s€/);
+  test("every line names the ad's way of doing the same thing", async ({ page }) => {
+    for (const promise of PROMISES) {
+      await expect(theirs(page, promise)).toContainText("Preko oglasa");
+    }
+    await expect(theirs(page, "Doplata piše uz svaki auto")).toContainText("Koja je poslednja cena?");
+    await expect(theirs(page, "Dovezeš svoj, odvezeš drugi")).toContainText("Prvo prodaš svoj");
   });
 
-  test("where the ad has question marks, ours has the figures", async ({ page }) => {
-    const costs = pair(page, "Sve ukupno, unapred");
-    await costs
-      .locator('[data-side="ours"]')
-      .evaluate((element) => element.scrollIntoView({ block: "center", behavior: "instant" }));
+  test("every line has a figure to prove it, and two are worked out from the example car", async ({ page }) => {
+    await expect(ours(page, "Dovezeš svoj, odvezeš drugi")).toContainText("1 dolazak");
+    await expect(ours(page, "Provereno pre potpisa")).toContainText("3 provere");
+    await expect(ours(page, "Bez pisanja oglasa")).toContainText("10 sekundi");
 
-    await expect(costs.locator('[data-side="theirs"]')).toContainText("?");
-    await expect(costs.locator('[data-side="ours"]')).toContainText("Porez na prenos");
-    await expect(costs.locator('[data-side="ours"]')).toContainText("Plaćaš ukupno");
-    await expect(costs.locator('[data-side="ours"]')).not.toContainText("?");
+    // The deal as a card words it.
+    await expect(ours(page, "Doplata piše uz svaki auto")).toContainText(/Golf\s*\+\s*[\d.]+\s€/);
+
+    // And what it all comes to: the very amount on the first card of the deck above.
+    const onTheCard = await topCard(page)
+      .getByText(/Sve ukupno/)
+      .innerText();
+    const amount = onTheCard.match(/[\d.]+\s€/)?.[0];
+    expect(amount).toBeTruthy();
+    await expect(ours(page, "Sve ukupno, unapred")).toContainText(`oko ${amount}`);
+  });
+
+  test("the lines wait until the board is on screen, then arrive", async ({ page }) => {
+    const first = ours(page, PROMISES[0]);
+    await expect(first).toHaveCSS("opacity", "0");
+
+    await first.evaluate((element) => element.scrollIntoView({ block: "center", behavior: "instant" }));
+
+    const last = PROMISES[PROMISES.length - 1];
+    await expect(ours(page, last)).toHaveCSS("opacity", "1");
+    await expect(theirs(page, last)).toHaveCSS("opacity", "1");
+  });
+
+  test("on a phone each line is one card: what you get on top, the ad's way under it", async ({ page }) => {
+    await versus(page).evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
+    await expect(ours(page, PROMISES[PROMISES.length - 1])).toHaveCSS("opacity", "1");
+
+    for (const promise of PROMISES) {
+      const top = await ours(page, promise).boundingBox();
+      const under = await theirs(page, promise).boundingBox();
+      if (!top || !under) throw new Error(`Line not drawn: ${promise}`);
+
+      expect(Math.round(under.x)).toBe(Math.round(top.x));
+      expect(Math.round(under.width)).toBe(Math.round(top.width));
+      expect(under.y).toBeGreaterThanOrEqual(top.y + top.height - 1);
+    }
   });
 });
 
@@ -253,7 +293,7 @@ test.describe("on the narrowest phones", () => {
   });
 });
 
-test.describe("how a swap goes, on a big screen", () => {
+test.describe("the landing page on a big screen", () => {
   test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
 
   test.beforeEach(async ({ page }) => {
@@ -293,6 +333,76 @@ test.describe("how a swap goes, on a big screen", () => {
     await expect(step(page, "Može zamena")).toContainText("Može zamena!");
   });
 
+  test("the four pieces are cards of one size, standing on one line", async ({ page }) => {
+    const boxes = await pieceBoxes(page);
+
+    expect(boxes).toHaveLength(4);
+    expect(new Set(boxes.map((box) => box.width)).size).toBe(1);
+    expect(new Set(boxes.map((box) => box.height)).size).toBe(1);
+    expect(new Set(boxes.map((box) => box.top)).size).toBe(1);
+  });
+
+  test("the match in step four waits for the car in step three to be parked", async ({ page }) => {
+    const steps = page.locator("#kako ol");
+    // Waiting for its turn below the fold: nothing of the match is drawn yet.
+    await expect(steps.locator('[data-piece="match"]').getByText("Može zamena!")).toHaveCSS("opacity", "0");
+
+    // Watched frame by frame from the moment the row comes on screen.
+    const order = await steps.evaluate(
+      (list) =>
+        new Promise<string[]>((resolve) => {
+          list.scrollIntoView({ block: "center", behavior: "instant" });
+          const title = [...list.querySelectorAll('[data-piece="match"] p')].find((p) =>
+            p.textContent?.includes("Može zamena!"),
+          );
+          const seen: string[] = [];
+          const until = performance.now() + 12_000;
+          const look = () => {
+            if (!seen.includes("parked") && list.querySelector("[data-bay]")) seen.push("parked");
+            if (!seen.includes("match") && title && Number(getComputedStyle(title).opacity) > 0) seen.push("match");
+            if (seen.length < 2 && performance.now() < until) requestAnimationFrame(look);
+            else resolve(seen);
+          };
+          look();
+        }),
+    );
+
+    expect(order).toEqual(["parked", "match"]);
+  });
+
+  test("the header keeps to the same column as the page under it", async ({ page }) => {
+    const mark = await page.getByRole("banner").getByRole("link", { name: "carswap" }).boundingBox();
+    const headline = await page.getByRole("heading", { level: 1 }).boundingBox();
+
+    expect(Math.round(mark?.x ?? -1)).toBe(Math.round(headline?.x ?? -2));
+  });
+
+  test("each thing you get stands beside the ad's way of doing it, and is the larger of the two", async ({ page }) => {
+    await versus(page).evaluate((element) => element.scrollIntoView({ block: "start", behavior: "instant" }));
+    await expect(ours(page, PROMISES[PROMISES.length - 1])).toHaveCSS("opacity", "1");
+
+    for (const promise of PROMISES) {
+      const right = await ours(page, promise).boundingBox();
+      const left = await theirs(page, promise).boundingBox();
+      if (!right || !left) throw new Error(`Line not drawn: ${promise}`);
+
+      // One line across both panels: the ad's way on the left, ours facing it.
+      expect(Math.round(left.y)).toBe(Math.round(right.y));
+      expect(Math.round(left.height)).toBe(Math.round(right.height));
+      expect(left.x + left.width).toBeLessThanOrEqual(right.x);
+      expect(right.width).toBeGreaterThan(left.width);
+    }
+
+    // What you get is the big print, and the ad's way the small.
+    const size = (locator: ReturnType<typeof ours>) =>
+      locator.evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+    const promise = await size(ours(page, PROMISES[0]).getByRole("heading"));
+    const figure = await size(ours(page, PROMISES[0]).locator("p").last());
+    const adsWay = await size(theirs(page, PROMISES[0]));
+    expect(promise).toBeGreaterThan(adsWay);
+    expect(figure).toBeGreaterThan(adsWay);
+  });
+
   test("nothing on the landing page is wider than the screen", async ({ page }) => {
     const height = await page.evaluate(() => document.documentElement.scrollHeight);
     for (let top = 0; top < height; top += 600) {
@@ -301,5 +411,18 @@ test.describe("how a swap goes, on a big screen", () => {
     }
 
     expect(await widerThanScreen(page)).toBe(0);
+  });
+
+  test.describe("with room for only two steps to a row", () => {
+    test.use({ viewport: { width: 1100, height: 800 } });
+
+    test("the four pieces are still one size, in two rows of two", async ({ page }) => {
+      const boxes = await pieceBoxes(page);
+
+      expect(boxes).toHaveLength(4);
+      expect(new Set(boxes.map((box) => box.width)).size).toBe(1);
+      expect(new Set(boxes.map((box) => box.height)).size).toBe(1);
+      expect(new Set(boxes.map((box) => box.top)).size).toBe(2);
+    });
   });
 });

@@ -1,330 +1,174 @@
 "use client";
 
-import { ArrowLeftRight, Check, ChevronRight, X } from "lucide-react";
-import { motion, type Variants } from "motion/react";
-import Image from "next/image";
-import { useRef, type ReactNode } from "react";
-import { CostBreakdown } from "@/components/car/CostBreakdown";
-import { DealSummary } from "@/components/deck/CarCard";
-import { CarChip } from "@/components/ui/CarChip";
-import { brand } from "@/lib/brand";
-import { cn } from "@/lib/cn";
+import { ArrowRight, Check, X } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useRef } from "react";
+import { Wordmark } from "@/components/brand/Wordmark";
+import { buttonClass } from "@/components/ui/Button";
+import { ByScreen } from "@/components/ui/ByScreen";
 import { copy } from "@/lib/copy";
 import { allIn } from "@/lib/cost-display";
-import { describeDeal } from "@/lib/deal-display";
-import type { DeckCard } from "@/lib/domain/deck";
-import { springs } from "@/lib/motion";
+import { dealLine, describeDeal } from "@/lib/deal-display";
+import { formatEur } from "@/lib/format";
 import { EXAMPLE_CAR } from "@/lib/reference";
-import { listingName } from "@/lib/share";
 import { pop, rise, stage, useEntrance } from "./entrance";
 import { examples } from "./how-examples";
 import { SectionHeading } from "./SectionHeading";
 
+const rows = copy.landing.versus;
+/** Rows of the board on a big screen: its heading, one per line, and its foot. */
+const BOARD_ROWS = rows.length + 2;
+
+/** When line `index` arrives, in seconds: one after another, top to bottom. */
+const arrives = (index: number) => 0.1 + index * 0.16;
+
 /**
- * "Zašto ne oglas?": four things that are tiresome about changing a car
- * through a classified ad, each next to what replaces it here.
+ * "Zašto ne oglas?": a classified ad and this app, line for line.
  *
- * Each pair is two cards, one on the other, in the deck's own language. The
- * ad's way is the grey one underneath, drawn the way people know it (the
- * messages, the question marks at the counter) and stamped DALJE. Ours lies
- * on top of it, and where the app already has the thing, it is the thing
- * itself: the deal as a card shows it, the costs as the details sheet lists
- * them, with the numbers of a real example.
+ * It is built to be taken in at a glance. Each line leads with what you get
+ * here, in the largest type on the board, ticked in red, with a figure beside
+ * it that proves it. Two of those figures are worked out from the page's
+ * example car, so they are real ones. What the same thing is like through an
+ * ad is the small grey print next to it.
  *
- * Laid out for a phone: one pair under another, as wide as the screen, with
- * ours lying on the ad's. On a big screen each pair is a tile, two abreast
- * and as wide as the page, with the two cards side by side inside it, so the
- * width is used and not left empty. Each plays once as it scrolls into view.
+ * On a big screen that is two panels side by side, the ad's flat and grey,
+ * ours white and raised, with each line of one facing its line in the other.
+ * On a phone each line is a card: ours on top, the ad's way as a footnote.
  */
 export function WhyNotAnAd() {
-  // The car the walkthrough above deals first, so the two sections tell one story.
+  const board = useRef<HTMLUListElement>(null);
+  const phase = useEntrance(board, 0.25);
+
+  // The car the walkthrough above deals first, so the figures here match what was just seen.
   const card = examples.deck[0];
-  const display = describeDeal(card.deal, card.listing);
-  const { price, costs, time, trust } = copy.landing.versus;
+  const total = allIn(card.deal, card.costs);
+  const worked: Record<string, string> = {
+    price: dealLine(describeDeal(card.deal, card.listing), EXAMPLE_CAR.model),
+    costs: total ? copy.costs.about(formatEur(total.amount)) : "",
+  };
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+    <section id="zasto" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
       <SectionHeading>{copy.landing.versusTitle}</SectionHeading>
       <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.versusLead}</p>
 
-      {/* One column that cannot grow past the screen, whatever is inside it. */}
-      <ul className="mt-10 grid grid-cols-1 gap-y-14 md:grid-cols-2 md:gap-x-12 lg:mt-12 lg:gap-6">
-        <Contrast item={price} theirs={<Haggling />}>
-          <DealSummary card={card} car={EXAMPLE_CAR} />
-        </Contrast>
+      <motion.ul
+        ref={board}
+        className="mt-10 grid grid-cols-1 gap-3 lg:mt-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-x-5 lg:gap-y-0"
+        {...stage(phase)}
+      >
+        {/* The two panels the lines sit on, on a big screen: theirs flat, ours raised. */}
+        <li
+          aria-hidden
+          style={{ gridRowEnd: `span ${BOARD_ROWS}` }}
+          className="hidden rounded-card bg-raised/80 ring-1 ring-line ring-inset lg:col-start-1 lg:row-start-1 lg:block"
+        />
+        <li
+          aria-hidden
+          style={{ gridRowEnd: `span ${BOARD_ROWS}` }}
+          className="hidden rounded-card bg-surface shadow-card ring-1 ring-line lg:col-start-2 lg:row-start-1 lg:block"
+        />
 
-        <Contrast item={costs} theirs={<AtTheCounter />}>
-          <CostBreakdown
-            compact
-            costs={card.costs}
-            chargesVat={card.dealer.chargesVat}
-            total={allIn(card.deal, card.costs)}
-            swapLine={
-              display.kind === "top-up" || display.kind === "cash-back"
-                ? {
-                    label: display.kind === "cash-back" ? copy.details.cashBack : copy.details.topUp,
-                    value: display.value,
-                  }
-                : null
-            }
-          />
-        </Contrast>
+        <li
+          aria-hidden
+          className="relative hidden items-center px-8 pt-7 pb-4 text-sm font-semibold tracking-wider text-fg-faint uppercase lg:col-start-1 lg:row-start-1 lg:flex"
+        >
+          {copy.landing.versusAd}
+        </li>
+        <li
+          aria-hidden
+          className="relative hidden items-center justify-between px-8 pt-6 pb-4 lg:col-start-2 lg:row-start-1 lg:flex"
+        >
+          <Wordmark />
+          <span className="flex items-center gap-1.5 rounded-full bg-raised px-3 py-1.5 text-xs font-semibold ring-1 ring-line ring-inset">
+            <span className="size-1.5 rounded-full bg-accent" />
+            {copy.deal.canSwap}
+          </span>
+        </li>
 
-        <Contrast item={time} theirs={<TheLongWay />}>
-          <OneVisit card={card} />
-        </Contrast>
+        {rows.map((row, index) => {
+          const at = arrives(index);
+          // On a big screen the two halves of a line leave their card and take their places on the board.
+          const onBoard = { gridRowStart: index + 2 };
+          return (
+            <li
+              key={row.key}
+              data-line={row.key}
+              className="overflow-hidden rounded-3xl bg-surface ring-1 ring-line ring-inset lg:contents"
+            >
+              {/* Ours comes first in the page: on a phone it is the top of the card, and it is the point. */}
+              <motion.div
+                data-side="ours"
+                variants={rise(at, 10)}
+                style={onBoard}
+                className="relative grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3.5 px-4 py-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] lg:col-start-2 lg:gap-x-5 lg:border-t lg:border-line lg:px-8 lg:py-5"
+              >
+                <motion.span
+                  variants={pop(at + 0.15)}
+                  aria-hidden
+                  className="flex size-7 items-center justify-center rounded-full bg-accent text-on-accent lg:size-8"
+                >
+                  <Check className="size-4" strokeWidth={3.5} />
+                </motion.span>
+                <div className="min-w-0">
+                  <h3 className="font-display text-xl leading-tight font-bold tracking-tight lg:text-2xl">{row.us}</h3>
+                  <p className="mt-1 text-[15px] leading-snug text-pretty text-fg-muted">{row.note}</p>
+                </div>
+                {/* Beside the line where there is room; under it on a narrow phone. */}
+                <motion.p
+                  variants={pop(at + 0.28)}
+                  className="col-start-2 mt-2 font-display text-xl leading-none font-extrabold tracking-tight whitespace-nowrap text-accent-strong tabular-nums sm:col-start-3 sm:mt-0 sm:text-2xl lg:text-[1.75rem]"
+                >
+                  {row.proof ?? worked[row.key]}
+                </motion.p>
+              </motion.div>
 
-        <Contrast item={trust} theirs={<OnTheirWord />}>
-          <Checked />
-        </Contrast>
-      </ul>
+              <motion.div
+                data-side="theirs"
+                variants={rise(at, 10)}
+                style={onBoard}
+                className="relative flex items-center gap-3 bg-raised/70 px-4 py-3 text-[15px] leading-snug text-fg-muted lg:col-start-1 lg:border-t lg:border-line lg:bg-transparent lg:px-8 lg:py-5 lg:text-base"
+              >
+                <span
+                  aria-hidden
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-hover text-fg-faint"
+                >
+                  <X className="size-3.5" strokeWidth={3} />
+                </span>
+                <p>
+                  <span className="mb-0.5 block text-[11px] font-semibold tracking-wider text-fg-faint uppercase lg:sr-only">
+                    {copy.landing.versusAd}
+                    <span className="sr-only">: </span>
+                  </span>
+                  {row.ad}
+                </p>
+              </motion.div>
+            </li>
+          );
+        })}
+
+        <li
+          aria-hidden
+          style={{ gridRowStart: BOARD_ROWS }}
+          className="relative hidden items-center border-t border-line px-8 pt-5 pb-7 font-display text-lg font-bold text-fg-muted lg:col-start-1 lg:flex"
+        >
+          {copy.landing.versusAdEnd}
+        </li>
+        <li
+          style={{ gridRowStart: BOARD_ROWS }}
+          className="relative mt-2 lg:col-start-2 lg:mt-0 lg:border-t lg:border-line lg:px-8 lg:pt-5 lg:pb-7"
+        >
+          <Link
+            href="/swipe"
+            transitionTypes={["nav-forward"]}
+            className={buttonClass({ size: "lg", className: "w-full lg:w-auto" })}
+          >
+            <ByScreen phone={copy.landing.cta} desktop={copy.landing.ctaDesktop} />
+            <ArrowRight className="size-5" aria-hidden />
+          </Link>
+        </li>
+      </motion.ul>
     </section>
-  );
-}
-
-// ── one pair ─────────────────────────────────────────────────────────────
-
-/** When the ad's card is stamped and set aside, in seconds. Long enough to have read it. */
-const SET_ASIDE_AT = 1.5;
-
-const theirCard: Variants = {
-  hidden: { opacity: 0, y: 16, rotate: 0 },
-  shown: {
-    opacity: 1,
-    y: 0,
-    rotate: -2,
-    transition: { ...springs.settle, rotate: { ...springs.settle, delay: SET_ASIDE_AT } },
-  },
-};
-
-const stamp: Variants = {
-  hidden: { opacity: 0, scale: 1.9, rotate: 16 },
-  shown: { opacity: 1, scale: 1, rotate: 8, transition: { ...springs.bouncy, delay: SET_ASIDE_AT } },
-};
-
-const ourCard: Variants = {
-  hidden: { opacity: 0, y: 44, scale: 0.96 },
-  shown: { opacity: 1, y: 0, scale: 1, transition: { ...springs.settle, delay: SET_ASIDE_AT + 0.25 } },
-};
-
-const label = "flex items-center gap-2 text-[11px] font-semibold tracking-wider uppercase";
-
-function Mark({ ours, className }: { ours: boolean; className?: string }) {
-  const Icon = ours ? Check : X;
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "flex size-5 shrink-0 items-center justify-center rounded-full",
-        ours ? "bg-accent text-on-accent" : "bg-hover text-fg-faint",
-        className,
-      )}
-    >
-      <Icon className="size-3" strokeWidth={3.5} />
-    </span>
-  );
-}
-
-interface ContrastProps {
-  item: { instead: string; title: string; body: string };
-  /** The ad's way, drawn. */
-  theirs: ReactNode;
-  /** Ours: the real thing where there is one. */
-  children: ReactNode;
-}
-
-function Contrast({ item, theirs, children }: ContrastProps) {
-  const pair = useRef<HTMLDivElement>(null);
-  const phase = useEntrance(pair);
-
-  return (
-    <li className="mx-auto w-full max-w-[26rem] min-w-0 md:mx-0 lg:max-w-none lg:rounded-card lg:bg-surface lg:p-8 lg:shadow-float lg:ring-1 lg:ring-line">
-      <p className="flex items-center gap-2 text-[15px] text-fg-muted">
-        <Mark ours={false} />
-        <span className="sr-only">{copy.landing.versusAd}: </span>
-        <s className="decoration-fg-faint/70">{item.instead}</s>
-      </p>
-      <h3 className="mt-2.5 font-display text-[1.75rem] leading-none font-bold tracking-tight lg:text-[2rem]">
-        {item.title}
-      </h3>
-      <p className="mt-3 leading-relaxed text-pretty text-fg-muted lg:max-w-md">{item.body}</p>
-
-      {/* A picture of what the lines above say, so it is not read out a second time. */}
-      <motion.div ref={pair} aria-hidden className="mt-6 lg:mt-8 lg:flex lg:items-center" {...stage(phase)}>
-        <motion.div
-          data-side="theirs"
-          variants={theirCard}
-          // The room at the bottom is what our card covers on a phone, so nothing
-          // written is hidden under it. Side by side, ours covers a strip on the right.
-          className="relative mr-7 rounded-[1.75rem] bg-raised p-4 pb-14 ring-1 ring-line lg:mr-0 lg:w-[54%] lg:shrink-0 lg:pr-12 lg:pb-5"
-        >
-          <p className={cn(label, "text-fg-faint")}>{copy.landing.versusAd}</p>
-          <div className="mt-3.5">{theirs}</div>
-          <motion.span
-            variants={stamp}
-            className="absolute top-3 right-3 rounded-lg border-[3px] border-fg bg-chip px-2 py-0.5 font-display text-lg leading-none font-extrabold text-fg shadow-float lg:right-12"
-          >
-            {copy.deck.stampPass}
-          </motion.span>
-        </motion.div>
-
-        <motion.div
-          data-side="ours"
-          variants={ourCard}
-          className="relative -mt-10 ml-7 rounded-[1.75rem] bg-surface p-4 shadow-card ring-1 ring-line lg:mt-0 lg:-ml-9 lg:min-w-0 lg:flex-1"
-        >
-          <p className={cn(label, "text-accent-strong")}>
-            <Mark ours />
-            {brand.name}
-          </p>
-          <div className="mt-3.5">{children}</div>
-        </motion.div>
-      </motion.div>
-    </li>
-  );
-}
-
-// ── the ad's way ─────────────────────────────────────────────────────────
-
-const bubble = "rounded-2xl bg-surface px-3.5 py-2 text-[15px] leading-snug text-fg-muted shadow-chip ring-1 ring-line";
-
-/** The messages. They arrive one after another, and one more is being typed. */
-function Haggling() {
-  const lines = copy.landing.versusChat;
-  return (
-    <ul className="flex flex-col items-start gap-2">
-      {lines.map((line, index) => (
-        <motion.li
-          key={line}
-          variants={pop(0.2 + index * 0.3)}
-          className={cn(bubble, "rounded-bl-md", index === 1 && "ml-7", index === 2 && "ml-2")}
-        >
-          {line}
-        </motion.li>
-      ))}
-      <motion.li variants={pop(0.2 + lines.length * 0.3)} className={cn(bubble, "ml-5 rounded-bl-md py-2.5")}>
-        <span className="flex gap-1">
-          <span className="size-1.5 rounded-full bg-fg-faint" />
-          <span className="size-1.5 rounded-full bg-fg-faint/70" />
-          <span className="size-1.5 rounded-full bg-fg-faint/40" />
-        </span>
-      </motion.li>
-    </ul>
-  );
-}
-
-/** The same three lines our breakdown answers, with nothing in them yet. */
-function AtTheCounter() {
-  const lines = [copy.costs.transferTax, copy.costs.paperwork, copy.costs.registration];
-  return (
-    <ul className="flex flex-col gap-2.5">
-      {lines.map((line, index) => (
-        <li key={line} className="flex items-baseline gap-2 text-[15px] text-fg-muted">
-          {line}
-          <span className="min-w-4 flex-1 border-b-2 border-dotted border-line-strong" />
-          <motion.span
-            variants={pop(0.25 + index * 0.28)}
-            className="font-display text-xl leading-none font-bold text-fg-faint"
-          >
-            ?
-          </motion.span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-const stepChip = "flex items-center gap-1.5 rounded-full py-1 text-sm";
-
-/** Seven things, one after another, before the second car is yours. */
-function TheLongWay() {
-  const steps = copy.landing.versusAdSteps;
-  return (
-    <>
-      <ol className="flex flex-wrap items-center gap-x-1 gap-y-2">
-        {steps.map((step, index) => (
-          <motion.li key={step} variants={pop(0.2 + index * 0.15)} className="flex items-center gap-1">
-            <span className={cn(stepChip, "bg-surface px-2.5 font-medium text-fg-muted shadow-chip ring-1 ring-line")}>
-              {step}
-            </span>
-            {index < steps.length - 1 ? <ChevronRight className="size-3.5 text-fg-faint" /> : null}
-          </motion.li>
-        ))}
-      </ol>
-      <motion.p variants={rise(0.2 + steps.length * 0.15, 6)} className="mt-3 text-sm font-semibold text-fg-muted">
-        {copy.landing.versusAdTime}
-      </motion.p>
-    </>
-  );
-}
-
-/** What every ad says about its car, stuck on like stickers. */
-function OnTheirWord() {
-  const tilt = [-3, 2, -1.5, 3];
-  return (
-    <ul className="flex flex-wrap gap-x-2 gap-y-2.5">
-      {copy.landing.versusClaims.map((claim, index) => (
-        <motion.li
-          key={claim}
-          variants={pop(0.2 + index * 0.24)}
-          style={{ rotate: tilt[index % tilt.length] }}
-          className="rounded-xl bg-surface px-3 py-1.5 text-[15px] font-medium text-fg-muted shadow-chip ring-1 ring-line"
-        >
-          {claim}
-        </motion.li>
-      ))}
-    </ul>
-  );
-}
-
-// ── ours, where the app does not have the thing yet ──────────────────────
-
-function Tick() {
-  return (
-    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent">
-      <Check className="size-3" strokeWidth={3.5} />
-    </span>
-  );
-}
-
-/** Three steps instead of seven, and the two cars changing places. */
-function OneVisit({ card }: { card: DeckCard }) {
-  const steps = copy.landing.versusOurSteps;
-  return (
-    <>
-      <ol className="flex flex-wrap items-center gap-x-1 gap-y-2">
-        {steps.map((step, index) => (
-          <li key={step} className="flex items-center gap-1">
-            <span className={cn(stepChip, "bg-raised pr-2.5 pl-1 font-semibold ring-1 ring-line ring-inset")}>
-              <Tick />
-              {step}
-            </span>
-            {index < steps.length - 1 ? <ChevronRight className="size-3.5 text-fg-faint" /> : null}
-          </li>
-        ))}
-      </ol>
-      {/* Wraps on the narrowest phones, where the name takes a line of its own. */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-2.5 gap-y-2">
-        <CarChip className="text-[0.95rem]">{EXAMPLE_CAR.model}</CarChip>
-        <ArrowLeftRight className="size-5 shrink-0 text-accent-strong" strokeWidth={2.6} />
-        <span className="relative aspect-[3/2] w-14 shrink-0 overflow-hidden rounded-xl bg-raised ring-1 ring-line">
-          <Image src={card.listing.photo.src} alt="" fill sizes="4rem" className="object-cover" />
-        </span>
-        <span className="font-display text-[15px] font-bold tracking-tight">{listingName(card.listing)}</span>
-      </div>
-    </>
-  );
-}
-
-function Checked() {
-  return (
-    <ul className="flex flex-col gap-2.5">
-      {copy.landing.versusChecks.map((check) => (
-        <li key={check} className="flex items-center gap-2.5 text-[15px] font-semibold">
-          <Tick />
-          {check}
-        </li>
-      ))}
-    </ul>
   );
 }

@@ -10,13 +10,25 @@ import { copy } from "@/lib/copy";
 import type { DeckCard } from "@/lib/domain/deck";
 import { useIsDesktop, useMediaQuery } from "@/lib/media";
 import { useEntrance, type Phase } from "./entrance";
-import { CarScene, DirectionScene, MatchScene, ParkScene, SwipeScene } from "./HowScenes";
+import { CarScene, DirectionScene, MatchScene, PARKED_AFTER_MS, ParkScene, SwipeScene } from "./HowScenes";
 import { SectionHeading } from "./SectionHeading";
 
 const steps = copy.landing.steps;
 
 /** With the steps side by side, how long each waits for the one before it, so the row reads left to right. */
 const TURN_MS = 1300;
+
+/**
+ * How long step `index` holds its first frame once its row is on screen,
+ * with `abreast` steps to a row. Alone in its row, it does not wait.
+ */
+function turnWait(index: number, abreast: number): number {
+  const place = index % abreast;
+  if (place === 0) return 0;
+  // The last step is the answer to the one before it: it waits until that car stands parked.
+  if (index === steps.length - 1) return (place - 1) * TURN_MS + PARKED_AFTER_MS + 120;
+  return place * TURN_MS;
+}
 
 /**
  * "Kako ide zamena": four steps, each shown with the piece of the app it is
@@ -40,18 +52,14 @@ export function HowItWorks() {
   const abreast = fourAbreast ? 4 : desktop ? 2 : 1;
 
   return (
-    <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
-      <div className="lg:flex lg:items-end lg:justify-between lg:gap-10">
-        <div>
-          <SectionHeading>{copy.landing.howTitle}</SectionHeading>
-          <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.howLead}</p>
-        </div>
-        <Finish className="hidden lg:flex lg:items-center lg:gap-6" />
-      </div>
+    <section id="kako" className="mx-auto max-w-7xl scroll-mt-20 px-5 py-16 lg:px-8 lg:py-24">
+      <SectionHeading>{copy.landing.howTitle}</SectionHeading>
+      <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.howLead}</p>
 
       {/* A swiped card leaves sideways; clipping at the screen's edge keeps it from widening the page. */}
       <div className="-mx-5 overflow-x-clip px-5 lg:mx-0 lg:overflow-x-visible lg:px-0">
-        <ol className="mt-10 grid grid-cols-1 gap-y-14 sm:gap-y-16 lg:mt-12 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-14 xl:grid-cols-4 xl:grid-rows-[auto_1fr] xl:gap-x-7 xl:gap-y-0">
+        {/* Side by side, the rows alternate: one as tall as its texts, one shared out evenly, so every piece is the same size. */}
+        <ol className="mt-10 grid grid-cols-1 gap-y-14 sm:gap-y-16 lg:mt-12 lg:auto-rows-[auto_1fr] lg:grid-cols-2 lg:gap-x-8 lg:gap-y-12 xl:grid-cols-4 xl:gap-x-6">
           <Step index={0} abreast={abreast}>
             {(phase) => <CarScene phase={phase} />}
           </Step>
@@ -66,7 +74,8 @@ export function HowItWorks() {
                 <div className="lg:hidden">
                   <SwipeScene phase={phase} onMatch={setMatched} />
                 </div>
-                <div className="max-lg:hidden">
+                {/* Full height, so the card inside can match its neighbours. */}
+                <div className="h-full max-lg:hidden">
                   <ParkScene phase={phase} onMatch={setMatched} />
                 </div>
               </>
@@ -78,7 +87,7 @@ export function HowItWorks() {
         </ol>
       </div>
 
-      <Finish className="mt-10 lg:hidden" />
+      <Finish className="mt-10 lg:mt-12 lg:flex lg:items-center lg:justify-center lg:gap-6" />
     </section>
   );
 }
@@ -130,17 +139,18 @@ function Step({ index, abreast, children }: StepProps) {
   const scene = useRef<HTMLDivElement>(null);
   // A scene performs once, when enough of it is on screen to be watched, and
   // after the ones to its left have had their start.
-  const phase = useTurn(useEntrance(scene, 0.4), (index % abreast) * TURN_MS);
+  const phase = useTurn(useEntrance(scene, 0.4), turnWait(index, abreast));
   const step = steps[index];
   const last = index === steps.length - 1;
 
   return (
     <li
       className={cn(
-        "relative sm:grid sm:grid-cols-[minmax(0,1fr)_22rem] sm:items-center sm:gap-x-10 lg:block",
-        // Four abreast, the text and the piece of every step share two rows,
-        // so the pieces start on one line however long the text above them is.
-        "xl:row-span-2 xl:grid xl:grid-cols-1 xl:grid-rows-subgrid xl:items-start xl:gap-x-0 xl:gap-y-6",
+        "relative sm:grid sm:grid-cols-[minmax(0,1fr)_22rem] sm:items-center sm:gap-x-10",
+        // Side by side, the text and the piece of every step share two rows of
+        // the list. So the pieces in a row start on one line, however long the
+        // text above each, and end on one line, whatever is inside each.
+        "lg:row-span-2 lg:grid-cols-1 lg:grid-rows-subgrid lg:items-stretch lg:gap-x-0 lg:gap-y-6",
       )}
     >
       <div>
@@ -163,7 +173,7 @@ function Step({ index, abreast, children }: StepProps) {
           {"desktop" in step ? <ByScreen phone={step.body} desktop={step.desktop.body} /> : step.body}
         </p>
       </div>
-      <div ref={scene} className="mt-5 sm:mt-0 lg:mt-6 lg:max-w-[24rem] xl:mt-0 xl:max-w-none">
+      <div ref={scene} className="mt-5 sm:mt-0">
         {children(phase)}
       </div>
     </li>
