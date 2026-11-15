@@ -52,7 +52,7 @@ apps/web/
     car/                 "my car" flow and budget sheet
     garage/              saved swaps
     landing/             landing page sections
-    ui/                  shared primitives: button, sheet, slider, plate, animated number
+    ui/                  shared primitives: button, sheet, slider, car chip, animated number
   src/lib/
     domain/              pure logic with unit tests: estimate, deal maths, deck order
     seed/                demo dealers, listings and vehicle catalogue

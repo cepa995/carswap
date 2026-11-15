@@ -4,7 +4,7 @@ Reads `manifest.json` (one entry per demo car: the Commons file plus its author
 and licence) and writes:
 
 - apps/web/public/seed/cars/<id>.webp     the photo, resized
-- apps/web/src/lib/seed/photos.json       size, blur backdrop, tint and credit per car
+- apps/web/src/lib/seed/photos.json       size, blur backdrop and credit per car
 - apps/web/public/seed/ATTRIBUTION.md     author, licence and source for every photo
 
 Run from the repository root:
@@ -17,7 +17,6 @@ Downloads are cached in scripts/seed-photos/.cache, so re-runs are offline.
 from __future__ import annotations
 
 import base64
-import colorsys
 import hashlib
 import io
 import json
@@ -109,52 +108,6 @@ def backdrop_data_url(image: Image.Image) -> str:
     return "data:image/webp;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
 
 
-# Glow colour per paint colour, all at a similar weight on a dark background.
-PAINT_TINTS = {
-    "red": "#e5484d",
-    "blue": "#4a82f5",
-    "yellow": "#e3c23a",
-    "green": "#63b84f",
-    "orange": "#f5803e",
-    "white": "#a8b5cc",
-    "silver": "#9aa6b5",
-    "grey": "#8791a3",
-    "black": "#6f7896",
-    "beige": "#c7a876",
-    "brown": "#b0835a",
-}
-
-
-def tint(image: Image.Image) -> str:
-    """The most vivid colour that covers a meaningful part of the photo.
-
-    Only a fallback: the vivid part of a car photo is often the sky, so when the
-    manifest says what colour the car is, that decides the glow instead.
-    """
-    small = image.resize((96, 64), Image.LANCZOS)
-    quantized = small.quantize(colors=8, method=Image.MEDIANCUT)
-    palette = quantized.getpalette()[: 8 * 3]
-    counts = sorted(quantized.getcolors(), reverse=True)
-    total = sum(count for count, _ in counts)
-
-    best, best_score = (120, 130, 150), -1.0
-    for count, index in counts:
-        share = count / total
-        if share < 0.05:
-            continue
-        r, g, b = palette[index * 3 : index * 3 + 3]
-        _, lightness, saturation = colorsys.rgb_to_hls(r / 255, g / 255, b / 255)
-        # Favour saturated colours that are neither near-black nor blown out.
-        score = saturation * (1 - abs(lightness - 0.5) * 1.4) * (0.5 + share)
-        if score > best_score:
-            best, best_score = (r, g, b), score
-
-    hue, _, saturation = colorsys.rgb_to_hls(*(channel / 255 for channel in best))
-    # Normalise so every glow has the same weight on a dark background.
-    r, g, b = colorsys.hls_to_rgb(hue, 0.56, min(0.85, max(0.32, saturation * 1.25)))
-    return f"#{round(r * 255):02x}{round(g * 255):02x}{round(b * 255):02x}"
-
-
 def main() -> None:
     manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
     OUT_IMAGES.mkdir(parents=True, exist_ok=True)
@@ -184,7 +137,6 @@ def main() -> None:
             "width": image.width,
             "height": image.height,
             "blur": backdrop_data_url(image),
-            "tint": PAINT_TINTS.get(entry.get("pictured", {}).get("color", "")) or tint(image),
             "credit": {
                 "author": entry["author"],
                 "license": entry["license"],
@@ -196,7 +148,7 @@ def main() -> None:
             f"[{entry['license']}]({entry['licenseUrl']})" if entry.get("licenseUrl") else entry["license"]
         )
         lines.append(f"| `cars/{entry['id']}.webp` | {entry['author']} | {licence} | [Commons]({entry['pageUrl']}) |")
-        print(f"{entry['id']:<22} {image.width}x{image.height}  {target.stat().st_size // 1024:>4} kB  {photos[entry['id']]['tint']}")
+        print(f"{entry['id']:<22} {image.width}x{image.height}  {target.stat().st_size // 1024:>4} kB")
 
     OUT_JSON.write_text(json.dumps(photos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_ATTRIBUTION.write_text("\n".join(lines) + "\n", encoding="utf-8")

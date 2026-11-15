@@ -35,7 +35,7 @@ export function Sheet({ open, onOpenChange, title, showTitle, height = "content"
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-40 bg-black/70"
+                className="fixed inset-0 z-40 bg-black/45"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -46,7 +46,7 @@ export function Sheet({ open, onOpenChange, title, showTitle, height = "content"
               <motion.div
                 className={cn(
                   "fixed inset-x-0 bottom-0 z-50 mx-auto flex w-full max-w-[30rem] flex-col rounded-t-sheet bg-surface outline-none",
-                  "shadow-[0_-1px_0_0_rgb(255_255_255/0.09)_inset,0_-24px_60px_rgb(0_0_0/0.6)]",
+                  "shadow-[0_-16px_48px_rgb(40_22_8/0.22)]",
                   height === "tall" ? "h-[92dvh]" : "max-h-[92dvh]",
                   className,
                 )}

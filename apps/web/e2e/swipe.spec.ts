@@ -69,9 +69,9 @@ test("with a car added, a like on a swap is a match that lands in the garage", a
   await page.getByRole("button", { name: "Volkswagen", exact: true }).click();
   await page.getByRole("button", { name: "Golf", exact: true }).click();
   await page.getByRole("button", { name: "2011", exact: true }).click();
-  await page.getByRole("button", { name: "Proceni moj auto" }).click();
+  await page.getByRole("button", { name: "Da vidimo koliko vredi" }).click();
   await expect(page.getByText("vredi oko")).toBeVisible();
-  await page.getByRole("button", { name: "Pokaži mi" }).click();
+  await page.getByRole("button", { name: "Daj da vidim" }).click();
 
   // Every card now leads with the swap, not the price.
   await expect(topCard(page)).toContainText("Može zamena");

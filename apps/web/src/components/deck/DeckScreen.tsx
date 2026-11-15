@@ -1,17 +1,17 @@
 "use client";
 
-import { Layers, Layers2, Plus, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Layers, Plus, SlidersHorizontal } from "lucide-react";
 import { AnimatePresence, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { browser } from "react-dom";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { BudgetSheet } from "@/components/car/BudgetSheet";
 import { MyCarSheet } from "@/components/car/MyCarSheet";
 import { GarageLink } from "@/components/garage/GarageLink";
 import { Button } from "@/components/ui/Button";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
@@ -31,7 +31,6 @@ import { DetailsSheet } from "./DetailsSheet";
 import { MatchMoment } from "./MatchMoment";
 import { SwipeDeck, type SwipeDeckHandle, type SwipeMethod } from "./SwipeDeck";
 
-const NEUTRAL_GLOW = "#2b4ba8";
 const TOAST_MS = 2200;
 /** Wait for the liked card to leave before asking what the visitor drives. */
 const ASK_FOR_CAR_DELAY_MS = 500;
@@ -187,10 +186,8 @@ export function DeckScreen() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [overlayOpen, top, openDetails, handleUndo]);
 
-  const glow = { "--glow": top?.listing.photo.tint ?? NEUTRAL_GLOW } as CSSProperties;
-
   return (
-    <div className="relative isolate flex h-dvh flex-col overflow-hidden overscroll-none" style={glow}>
+    <div className="relative isolate flex h-dvh flex-col overflow-hidden overscroll-none">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 ambient" />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 grain opacity-[0.06]" />
       <EdgeGlow intent={intent} />
@@ -213,53 +210,50 @@ export function DeckScreen() {
           <GarageLink count={likedCount} />
         </header>
 
-        <div className="flex shrink-0 items-center gap-2 px-5 pb-3">
+        <div className="flex shrink-0 items-center gap-2 px-5">
           {car ? (
             <>
               <button
                 type="button"
                 onClick={() => openCarSheet("deck")}
                 aria-label={`${copy.car.yours}: ${car.make} ${car.model}, ${car.year}. ${copy.car.edit}`}
-                className="rounded-[0.6rem] transition duration-150 ease-out-expo active:scale-[0.97]"
+                className="min-w-0 rounded-full transition duration-150 ease-out-expo active:scale-[0.97]"
               >
-                <Plate className="text-[0.95rem]">
+                <CarChip
+                  className="text-[0.95rem]"
+                  trailing={<ChevronDown className="-mr-[0.25em] size-[1.05em] shrink-0 text-fg-faint" aria-hidden />}
+                >
                   {car.model} · {car.year}
-                </Plate>
+                </CarChip>
               </button>
               <button
                 type="button"
                 onClick={() => setBudgetSheetOpen(true)}
-                className="flex h-9 items-center gap-2 rounded-full bg-raised/80 px-3.5 text-sm font-semibold ring-1 ring-line-strong transition duration-150 ease-out-expo ring-inset hover:bg-hover active:scale-[0.97]"
+                className="flex h-8 shrink-0 items-center gap-2 rounded-full bg-surface px-3.5 text-sm font-semibold whitespace-nowrap shadow-chip ring-1 ring-line transition duration-150 ease-out-expo hover:bg-raised active:scale-[0.97]"
               >
-                <SlidersHorizontal className="size-4 text-sky" aria-hidden />
+                <SlidersHorizontal className="size-4 text-accent-strong" aria-hidden />
                 {budget === 0 ? copy.budget.evenSwap : copy.budget.chip(formatEur(budget))}
               </button>
             </>
           ) : (
+            // The same shape as the car chip it turns into, in ink so it reads as "to do".
             <button
               type="button"
               onClick={() => openCarSheet("deck")}
-              className="animate-pulse-ring rounded-[0.6rem] transition duration-150 ease-out-expo active:scale-[0.97]"
+              className="flex h-9 animate-pulse-ring items-center gap-2 rounded-full bg-fg py-1 pr-4 pl-1 text-sm font-semibold text-canvas transition duration-150 ease-out-expo hover:bg-fg/90 active:scale-[0.97]"
             >
-              {/* An empty plate: the slot the visitor's own car will fill. */}
-              <Plate className="text-[0.95rem]">
-                <span className="flex items-center gap-1.5">
-                  <Plus className="size-4 text-accent" strokeWidth={3} aria-hidden />
-                  {copy.car.add}
-                </span>
-              </Plate>
+              <span
+                aria-hidden
+                className="flex size-7 items-center justify-center rounded-full bg-accent text-on-accent"
+              >
+                <Plus className="size-4" strokeWidth={3} />
+              </span>
+              {copy.car.add}
             </button>
           )}
-          {cards.length > 0 ? (
-            <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-fg-faint tabular-nums">
-              <Layers2 className="size-3.5" aria-hidden />
-              <span className="sr-only">{copy.deck.left}</span>
-              {cards.length}
-            </span>
-          ) : null}
         </div>
 
-        <main className="relative min-h-0 flex-1 px-4 pb-8">
+        <main className="relative min-h-0 flex-1 px-4 pt-6 pb-8">
           <div className="mx-auto h-full max-h-[42rem] w-full max-w-[26rem]">
             {cards.length > 0 ? (
               <SwipeDeck
@@ -375,12 +369,12 @@ function EdgeGlow({ intent }: { intent: MotionValue<number> }) {
       <motion.div
         aria-hidden
         style={{ opacity: like }}
-        className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-2/5 bg-linear-to-l from-accent/25 to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 -z-10 w-2/5 bg-linear-to-l from-accent/30 to-transparent"
       />
       <motion.div
         aria-hidden
         style={{ opacity: pass }}
-        className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-2/5 bg-linear-to-r from-pass/25 to-transparent"
+        className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-2/5 bg-linear-to-r from-pass/12 to-transparent"
       />
     </>
   );
@@ -400,7 +394,7 @@ function Toast({ message }: { message: ToastMessage | null }) {
             className={
               message.positive
                 ? "flex max-w-full items-center gap-2.5 rounded-full bg-accent py-2 pr-4 pl-3 text-sm font-semibold text-on-accent shadow-accent"
-                : "flex max-w-full items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold glass"
+                : "flex max-w-full items-center gap-2 rounded-full bg-canvas/90 px-4 py-2 text-sm font-semibold dark-surface shadow-float"
             }
           >
             {message.positive ? <span aria-hidden className="size-2 shrink-0 rounded-full bg-on-accent" /> : null}
@@ -445,7 +439,7 @@ function EmptyDeck({
       transition={springs.settle}
       className="flex h-full flex-col items-center justify-center rounded-card border border-dashed border-line-strong px-7 text-center"
     >
-      <span className="flex size-16 items-center justify-center rounded-3xl bg-raised text-sky ring-1 ring-line-strong ring-inset">
+      <span className="flex size-16 items-center justify-center rounded-3xl bg-surface text-accent-strong shadow-chip ring-1 ring-line">
         <Layers className="size-8" aria-hidden />
       </span>
       <h2 className="mt-6 font-display text-[1.9rem] leading-none font-bold tracking-tight text-balance">

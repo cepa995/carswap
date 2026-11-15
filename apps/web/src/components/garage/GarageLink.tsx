@@ -13,7 +13,7 @@ export function GarageLink({ count }: { count: number }) {
       href="/garage"
       transitionTypes={["nav-forward"]}
       aria-label={`${copy.nav.garage}, ${copy.garage.saved(count)}`}
-      className="relative flex h-10 items-center gap-2 rounded-full bg-raised/80 pr-3.5 pl-3 text-sm font-semibold ring-1 ring-line-strong transition duration-150 ease-out-expo ring-inset hover:bg-hover active:scale-[0.97]"
+      className="relative flex h-10 items-center gap-2 rounded-full bg-surface pr-3.5 pl-3 text-sm font-semibold shadow-chip ring-1 ring-line transition duration-150 ease-out-expo hover:bg-raised active:scale-[0.97]"
     >
       <Warehouse className="size-[1.15rem] text-fg-muted" aria-hidden />
       <span aria-hidden>{copy.nav.garage}</span>

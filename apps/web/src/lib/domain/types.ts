@@ -15,8 +15,6 @@ export interface Photo {
   height: number;
   /** Tiny pre-blurred image as a data URL. Scaled up, it becomes the card's backdrop. */
   blur: string;
-  /** A vivid colour pulled from the photo, used for the ambient glow. */
-  tint: string;
   credit: PhotoCredit;
 }
 

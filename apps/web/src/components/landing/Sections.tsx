@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { buttonClass } from "@/components/ui/Button";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { brand } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
@@ -50,9 +50,9 @@ const exampleEstimate = estimateValue(EXAMPLE_CAR, REFERENCE_YEAR);
 
 const stepArt: ReactNode[] = [
   <div key="car" className="flex flex-col items-start gap-3">
-    <Plate className="text-lg">
+    <CarChip className="text-lg">
       {EXAMPLE_CAR.model} · {EXAMPLE_CAR.year}
-    </Plate>
+    </CarChip>
     <p className="font-display text-[1.7rem] leading-none font-extrabold tracking-tight tabular-nums">
       {formatInt(exampleEstimate.low)} – {formatEur(exampleEstimate.high)}
     </p>
@@ -60,8 +60,8 @@ const stepArt: ReactNode[] = [
 
   <div key="swipe" className="relative h-28 w-24">
     <div className="absolute inset-x-2 top-0 bottom-1 -rotate-[10deg] rounded-2xl bg-hover ring-1 ring-line-strong" />
-    <div className="absolute inset-x-2 top-0 bottom-1 rotate-[8deg] rounded-2xl bg-linear-to-b from-[#56668c] to-[#1b1f2e] ring-1 ring-white/20">
-      <span className="absolute top-3 -left-6 -rotate-12 rounded-lg border-[3px] border-accent bg-plate px-1.5 py-0.5 font-display text-base leading-none font-extrabold text-accent-strong">
+    <div className="absolute inset-x-2 top-0 bottom-1 rotate-[8deg] rounded-2xl bg-linear-to-b from-[#d9c6ae] to-[#2b211b] shadow-float ring-1 ring-black/10">
+      <span className="absolute top-3 -left-6 -rotate-12 rounded-lg border-[3px] border-accent bg-chip px-1.5 py-0.5 font-display text-base leading-none font-extrabold text-accent-strong">
         {copy.deck.stampLike}
       </span>
       <span className="absolute inset-x-2.5 bottom-2.5 h-2 rounded-full bg-white/25" />
@@ -76,7 +76,7 @@ const stepArt: ReactNode[] = [
     <ul className="flex flex-wrap gap-1.5 text-xs font-medium text-fg-muted">
       {copy.landing.closingSteps.map((item) => (
         <li key={item} className="flex items-center gap-1 rounded-full bg-hover px-2.5 py-1">
-          <Check className="size-3 text-sky" strokeWidth={3} aria-hidden />
+          <Check className="size-3 text-accent-strong" strokeWidth={3} aria-hidden />
           {item}
         </li>
       ))}
@@ -98,7 +98,9 @@ export function HowItWorks() {
               {stepArt[index]}
             </div>
             <div className="p-4 pt-5">
-              <p className="font-display text-sm font-bold tracking-wider text-sky tabular-nums">0{index + 1}</p>
+              <p className="font-display text-sm font-bold tracking-wider text-accent-strong tabular-nums">
+                0{index + 1}
+              </p>
               <h3 className="mt-1 font-display text-2xl font-bold tracking-tight">{step.title}</h3>
               <p className="mt-2 text-[15px] leading-relaxed text-pretty text-fg-muted">{step.body}</p>
             </div>
@@ -131,7 +133,7 @@ export function WhyNotAnAd() {
               <span
                 className={cn(
                   "flex size-12 shrink-0 items-center justify-center rounded-2xl",
-                  index === 1 ? "bg-on-accent/15" : "bg-raised text-sky ring-1 ring-line-strong ring-inset",
+                  index === 1 ? "bg-on-accent/15" : "bg-raised text-accent-strong",
                 )}
               >
                 <Icon className="size-6" aria-hidden />
@@ -191,7 +193,7 @@ export function Closing() {
         <Link
           href="/swipe"
           transitionTypes={["nav-forward"]}
-          className="relative mt-9 inline-flex h-14 items-center gap-2 rounded-full bg-fg px-7 text-base font-semibold text-canvas transition duration-200 ease-out-expo hover:bg-sky active:scale-[0.97]"
+          className="relative mt-9 inline-flex h-14 items-center gap-2 rounded-full bg-surface px-7 text-base font-semibold text-fg shadow-float transition duration-200 ease-out-expo hover:bg-raised active:scale-[0.97]"
         >
           {copy.landing.cta}
           <ArrowRight className="size-5" aria-hidden />

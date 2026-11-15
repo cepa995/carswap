@@ -12,8 +12,9 @@ const variants: Record<Variant, string> = {
   primary: "bg-accent text-on-accent shadow-accent hover:bg-accent-strong",
   secondary: "bg-raised text-fg ring-1 ring-inset ring-line-strong hover:bg-hover",
   ghost: "text-fg-muted hover:bg-raised hover:text-fg",
-  // For red surfaces, where a red button would vanish.
-  light: "bg-fg text-canvas shadow-float hover:bg-sky",
+  // For red surfaces, where a red button would vanish. Both read their colours
+  // from the surrounding scope, so they are light on `dark-surface`.
+  light: "bg-fg text-canvas shadow-float hover:bg-fg/90",
   outline: "text-fg ring-2 ring-inset ring-fg/70 hover:bg-fg/10",
 };
 

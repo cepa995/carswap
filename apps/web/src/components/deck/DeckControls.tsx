@@ -18,9 +18,13 @@ interface DeckControlsProps {
 }
 
 const small =
-  "flex size-12 items-center justify-center rounded-full bg-raised text-fg-muted ring-1 ring-line-strong ring-inset " +
-  "transition duration-200 ease-out-expo hover:bg-hover hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-30";
+  "flex size-12 shrink-0 items-center justify-center rounded-full bg-surface text-fg-muted shadow-chip ring-1 ring-line " +
+  "transition duration-200 ease-out-expo hover:bg-raised hover:text-fg active:scale-90 disabled:pointer-events-none disabled:opacity-35";
 
+/**
+ * The two decisions are spelled out, not left to icons: not everyone arriving
+ * from an ad has used a swipe app, and "Menjam" is the word they would use.
+ */
 export function DeckControls({
   intent,
   hasCard,
@@ -31,12 +35,12 @@ export function DeckControls({
   onLike,
   onDetails,
 }: DeckControlsProps) {
-  const passScale = useTransform(intent, [-1, 0], [1.18, 1]);
-  const likeScale = useTransform(intent, [0, 1], [1, 1.18]);
+  const passScale = useTransform(intent, [-1, 0], [1.08, 1]);
+  const likeScale = useTransform(intent, [0, 1], [1, 1.08]);
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="flex items-center justify-center gap-4">
+    <div className="mx-auto flex w-full max-w-[26rem] flex-col items-center gap-3">
+      <div className="flex w-full items-center gap-2.5">
         <button type="button" className={small} onClick={onUndo} disabled={!canUndo} aria-label={copy.deck.undo}>
           <Undo2 className="size-5" strokeWidth={2.2} />
         </button>
@@ -44,36 +48,36 @@ export function DeckControls({
         <motion.button
           type="button"
           style={{ scale: passScale }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.94 }}
           onClick={onPass}
           disabled={!hasCard}
-          aria-label={copy.deck.pass}
-          className="flex size-16 items-center justify-center rounded-full bg-raised text-pass shadow-float ring-2 ring-pass/40 ring-inset hover:bg-hover disabled:pointer-events-none disabled:opacity-30"
+          className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-surface text-base font-semibold text-fg shadow-float ring-1 ring-line-strong hover:bg-raised disabled:pointer-events-none disabled:opacity-35"
         >
-          <X className="size-7" strokeWidth={3} />
+          <X className="size-5" strokeWidth={3} aria-hidden />
+          {copy.deck.pass}
         </motion.button>
 
-        <div className="relative">
+        <div className="relative min-w-0 flex-[1.3]">
           {likePulse > 0 ? (
             <motion.span
               key={likePulse}
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-full bg-accent"
-              initial={{ scale: 1, opacity: 0.55 }}
-              animate={{ scale: 2, opacity: 0 }}
+              initial={{ scaleX: 1, scaleY: 1, opacity: 0.5 }}
+              animate={{ scaleX: 1.14, scaleY: 1.5, opacity: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             />
           ) : null}
           <motion.button
             type="button"
             style={{ scale: likeScale }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.94 }}
             onClick={onLike}
             disabled={!hasCard}
-            aria-label={copy.deck.like}
-            className="relative flex size-[4.5rem] items-center justify-center rounded-full bg-accent text-on-accent shadow-accent hover:bg-accent-strong disabled:pointer-events-none disabled:opacity-30"
+            className="relative flex h-14 w-full items-center justify-center gap-2 rounded-full bg-accent text-base font-semibold text-on-accent shadow-accent hover:bg-accent-strong disabled:pointer-events-none disabled:opacity-35"
           >
-            <Heart className="size-8 fill-current" strokeWidth={2} />
+            <Heart className="size-5 fill-current" strokeWidth={2} aria-hidden />
+            {copy.deck.like}
           </motion.button>
         </div>
 
@@ -96,7 +100,7 @@ export function DeckControls({
 function Shortcut({ icon: Icon, letter, label }: { icon?: LucideIcon; letter?: string; label: string }) {
   return (
     <li className="flex items-center gap-1.5">
-      <kbd className="flex size-5 items-center justify-center rounded-md bg-raised font-sans text-[11px] font-semibold text-fg-muted ring-1 ring-line-strong ring-inset">
+      <kbd className="flex size-5 items-center justify-center rounded-md bg-surface font-sans text-[11px] font-semibold text-fg-muted ring-1 ring-line-strong">
         {Icon ? <Icon className="size-3" strokeWidth={2.6} /> : letter}
       </kbd>
       {label}

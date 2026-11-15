@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { Button } from "@/components/ui/Button";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { RangeSlider } from "@/components/ui/RangeSlider";
 import { Sheet } from "@/components/ui/Sheet";
 import { track } from "@/lib/analytics";
@@ -175,7 +175,7 @@ function Wizard({ onClose, onDone }: { onClose: () => void; onDone: () => void }
 function StepTitle({ eyebrow, children }: { eyebrow?: string; children: string }) {
   return (
     <div className="shrink-0 px-6 pb-4">
-      {eyebrow ? <p className="mb-1 text-sm font-medium text-sky">{eyebrow}</p> : null}
+      {eyebrow ? <p className="mb-1 text-sm font-semibold text-accent-strong">{eyebrow}</p> : null}
       <h2 className="font-display text-[1.9rem] leading-none font-bold tracking-tight">{children}</h2>
     </div>
   );
@@ -196,7 +196,7 @@ function MakeStep({ onPick }: { onPick: (make: string) => void }) {
     <>
       <StepTitle>{copy.wizard.title}</StepTitle>
       <div className="shrink-0 px-5 pb-3">
-        <label className="flex h-12 items-center gap-3 rounded-2xl bg-raised px-4 ring-1 ring-line ring-inset focus-within:ring-2 focus-within:ring-sky">
+        <label className="flex h-12 items-center gap-3 rounded-2xl bg-raised px-4 ring-1 ring-line ring-inset focus-within:ring-2 focus-within:ring-fg">
           <Search className="size-5 shrink-0 text-fg-faint" aria-hidden />
           <input
             type="search"
@@ -398,9 +398,9 @@ function ResultStep({
     <>
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-6">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <Plate className="text-lg">
+          <CarChip className="text-lg">
             {car.model} · {car.year}
-          </Plate>
+          </CarChip>
           <span className="text-fg-muted">{copy.wizard.resultLead}</span>
         </div>
 
@@ -444,7 +444,7 @@ function ResultStep({
           <button
             type="button"
             onClick={onRemove}
-            className="rounded-full px-3 py-2 text-fg-faint hover:bg-raised hover:text-accent-soft"
+            className="rounded-full px-3 py-2 text-fg-faint hover:bg-raised hover:text-accent-strong"
           >
             {copy.car.remove}
           </button>

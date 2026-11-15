@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Dialog } from "radix-ui";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { copy } from "@/lib/copy";
 import { dealLine, describeDeal } from "@/lib/deal-display";
 import type { DeckCard } from "@/lib/domain/deck";
@@ -29,7 +29,7 @@ const CONFETTI = Array.from({ length: 18 }, (_, index) => {
     x: Math.cos(angle) * distance,
     y: Math.sin(angle) * distance - 40,
     rotate: ((index * 67) % 360) - 180,
-    tone: ["bg-fg", "bg-canvas", "bg-fg", "bg-sky"][index % 4],
+    tone: ["bg-fg", "bg-canvas", "bg-fg", "bg-[#ffc2c5]"][index % 4],
     wide: index % 2 === 0,
     delay: (index % 6) * 0.018,
   };
@@ -67,7 +67,7 @@ export function MatchMoment({ card, car, onContinue, onOpenGarage }: MatchMoment
             </Dialog.Overlay>
             <Dialog.Content asChild forceMount aria-describedby={undefined}>
               <motion.div
-                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden px-6 text-center outline-none"
+                className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden px-6 text-center dark-surface outline-none"
                 style={{ "--glow": "#ff9aa0" } as React.CSSProperties}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -113,7 +113,7 @@ export function MatchMoment({ card, car, onContinue, onOpenGarage }: MatchMoment
                       animate={{ x: 0, rotate: -8, opacity: 1 }}
                       transition={{ ...springs.bouncy, delay: 0.22 }}
                     >
-                      <Plate className="text-xl">{car.model}</Plate>
+                      <CarChip className="text-xl">{car.model}</CarChip>
                     </motion.div>
                   ) : null}
 

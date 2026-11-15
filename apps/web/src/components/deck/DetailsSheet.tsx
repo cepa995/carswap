@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { Sheet } from "@/components/ui/Sheet";
 import { cn } from "@/lib/cn";
 import { bodyLabel, copy, fuelLabel, gearboxLabel } from "@/lib/copy";
-import { describeDeal } from "@/lib/deal-display";
+import { dealTone, describeDeal } from "@/lib/deal-display";
 import type { DeckCard } from "@/lib/domain/deck";
 import type { UserCar } from "@/lib/domain/types";
 import { formatEur, formatKm, formatPower } from "@/lib/format";
@@ -111,7 +111,7 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
                 label={
                   <span className="flex items-center gap-2">
                     {copy.details.yourCarCredit}
-                    {car ? <Plate className="text-[0.7rem]">{car.model}</Plate> : null}
+                    {car ? <CarChip className="text-[0.72rem]">{car.model}</CarChip> : null}
                   </span>
                 }
                 value={`− ${formatEur(deal.credit)}`}
@@ -121,7 +121,7 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
                 strong
                 label={display.kind === "cash-back" ? copy.details.cashBack : copy.details.topUp}
                 value={display.value}
-                valueClassName={display.flag?.tone === "warn" ? "text-fg-muted" : undefined}
+                valueClassName={dealTone(display)}
               />
               {display.flag?.tone === "warn" ? (
                 <p className="mt-2 text-sm font-medium text-warn">{display.flag.text}</p>

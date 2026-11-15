@@ -32,7 +32,6 @@ const listing = (priceEur: number): Listing => ({
     width: 1280,
     height: 853,
     blur: "data:,",
-    tint: "#000000",
     credit: { author: "a", license: "CC0", licenseUrl: "", sourceUrl: "" },
   },
 });

@@ -9,13 +9,13 @@ import { browser } from "react-dom";
 import { MyCarSheet } from "@/components/car/MyCarSheet";
 import { DetailsSheet } from "@/components/deck/DetailsSheet";
 import { Button, buttonClass } from "@/components/ui/Button";
-import { Plate } from "@/components/ui/Plate";
+import { CarChip } from "@/components/ui/CarChip";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
 import { cn } from "@/lib/cn";
 import { copy, fuelLabel } from "@/lib/copy";
-import { describeDeal, type DealDisplay } from "@/lib/deal-display";
+import { dealTone, describeDeal, type DealDisplay } from "@/lib/deal-display";
 import { buildCards, type DeckCard } from "@/lib/domain/deck";
 import { formatKm } from "@/lib/format";
 import { springs } from "@/lib/motion";
@@ -64,7 +64,7 @@ export function GarageScreen() {
   }
 
   return (
-    <div className="relative isolate flex min-h-dvh flex-col" style={{ "--glow": "#2b4ba8" } as React.CSSProperties}>
+    <div className="relative isolate flex min-h-dvh flex-col" style={{ "--glow": "#f1c7b8" } as React.CSSProperties}>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 ambient" />
 
       <div className="mx-auto flex w-full max-w-[30rem] flex-1 flex-col px-5 pb-10">
@@ -83,9 +83,9 @@ export function GarageScreen() {
               onClick={() => setCarSheetOpen(true)}
               aria-label={`${copy.car.yours}. ${copy.car.edit}`}
             >
-              <Plate className="text-[0.85rem]">
+              <CarChip className="text-[0.85rem]">
                 {car.model} · {car.year}
-              </Plate>
+              </CarChip>
             </button>
           ) : null}
         </header>
@@ -97,7 +97,7 @@ export function GarageScreen() {
 
         {saved.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-            <span className="flex size-20 items-center justify-center rounded-[1.75rem] bg-raised text-sky ring-1 ring-line-strong ring-inset">
+            <span className="flex size-20 items-center justify-center rounded-[1.75rem] bg-surface text-accent-strong shadow-chip ring-1 ring-line">
               <Warehouse className="size-10" aria-hidden />
             </span>
             <h2 className="mt-6 font-display text-3xl font-bold tracking-tight">{copy.garage.emptyTitle}</h2>
@@ -233,7 +233,7 @@ function GarageItem({
         type="button"
         onClick={onRemove}
         aria-label={`${copy.garage.remove}: ${listing.make} ${listing.model}`}
-        className="absolute top-2 right-2 flex size-9 items-center justify-center rounded-full text-fg-faint hover:bg-hover hover:text-accent-soft"
+        className="absolute top-2 right-2 flex size-9 items-center justify-center rounded-full text-fg-faint hover:bg-raised hover:text-accent-strong"
       >
         <Trash2 className="size-[1.05rem]" aria-hidden />
       </button>
@@ -244,22 +244,25 @@ function GarageItem({
 function DealChip({ display, carModel }: { display: DealDisplay; carModel: string | null }) {
   const swap = display.kind !== "price" && carModel !== null;
   return (
-    <span className="mt-1.5 flex items-center gap-1.5">
-      {swap ? <Plate className="text-[0.62rem]">{carModel}</Plate> : null}
-      {swap && display.kind === "top-up" ? <span className="text-sm font-semibold">+</span> : null}
-      {swap && display.kind === "cash-back" ? (
-        <span className="text-xs text-fg-muted">{copy.deal.cashBackSuffix}</span>
-      ) : null}
-      <span
-        className={cn(
-          "font-display text-[1.05rem] leading-none font-bold tracking-tight tabular-nums",
-          display.flag?.tone === "warn" ? "text-fg-muted" : "text-fg",
-        )}
-      >
-        {display.value}
+    <span className="mt-1.5 flex flex-col gap-1">
+      <span className="flex min-w-0 items-center gap-1.5">
+        {swap ? <CarChip className="text-[0.68rem]">{carModel}</CarChip> : null}
+        {swap && display.kind === "top-up" ? <span className="text-sm font-semibold">+</span> : null}
+        {swap && display.kind === "cash-back" ? (
+          <span className="shrink-0 text-xs text-fg-muted">{copy.deal.cashBackSuffix}</span>
+        ) : null}
+        <span
+          className={cn(
+            "shrink-0 font-display text-[1.05rem] leading-none font-bold tracking-tight tabular-nums",
+            dealTone(display),
+          )}
+        >
+          {display.value}
+        </span>
       </span>
+      {/* On its own line, so a long note is never squeezed out by the figure. */}
       {display.flag && display.flag.tone !== "ok" ? (
-        <span className={cn("truncate text-xs", display.flag.tone === "warn" ? "text-warn" : "text-fg-faint")}>
+        <span className={cn("text-xs font-medium", display.flag.tone === "warn" ? "text-warn" : "text-fg-faint")}>
           {display.flag.text}
         </span>
       ) : null}

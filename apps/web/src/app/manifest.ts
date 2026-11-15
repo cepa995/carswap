@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/swipe",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#090e20",
-    theme_color: "#090e20",
+    background_color: "#f8f4ee",
+    theme_color: "#f8f4ee",
     icons: [
       { src: "/icon.svg", type: "image/svg+xml", sizes: "any" },
       { src: "/apple-icon", type: "image/png", sizes: "180x180" },

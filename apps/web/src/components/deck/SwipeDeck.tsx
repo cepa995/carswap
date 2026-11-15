@@ -389,14 +389,12 @@ function Stamp({
   children: ReactNode;
 }) {
   const position =
-    tone === "like"
-      ? "left-5 -rotate-12 border-accent text-accent"
-      : "right-5 rotate-12 border-plate-band text-plate-band";
+    tone === "like" ? "left-5 -rotate-12 border-accent text-accent" : "right-5 rotate-12 border-chip-ink text-chip-ink";
   return (
     <motion.div
       aria-hidden
       style={style}
-      className={`pointer-events-none absolute top-9 rounded-2xl border-[5px] bg-plate px-3.5 py-1 font-display text-[2.25rem] leading-none font-extrabold tracking-tight shadow-float ${position}`}
+      className={`pointer-events-none absolute top-9 rounded-2xl border-[5px] bg-chip px-3.5 py-1 font-display text-[2.25rem] leading-none font-extrabold tracking-tight shadow-float ${position}`}
     >
       {children}
     </motion.div>

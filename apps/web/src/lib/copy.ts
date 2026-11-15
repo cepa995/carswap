@@ -3,6 +3,10 @@ import type { BodyStyle, Fuel, Gearbox } from "@/lib/domain/types";
 /**
  * All user-facing text, in Serbian (Latin), informal "ti".
  *
+ * The voice borrows from how people in Serbia actually write and talk about
+ * selling a car: "može zamena", "ključ za ključ", "poslednja cena?". It should
+ * sound like a friend who knows cars, never like a bank.
+ *
  * Two rules keep it grammatical without a declension engine:
  * - car names only ever appear in the nominative ("Golf + 2.400 €"), never
  *   inside a sentence that would need a case ending or a gendered adjective;
@@ -12,7 +16,7 @@ export const copy = {
   meta: {
     title: "Šta tvoj auto može da postane?",
     description:
-      "Zameni auto bez oglasa i cenkanja. Reci šta voziš i koliko možeš da doplatiš, prevuci desno ono što ti se sviđa i odmah vidiš gde može zamena.",
+      "Menjaj auto bez oglasa i cenkanja. Reci šta voziš i koliko možeš da doplatiš, prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
   },
 
   common: {
@@ -27,20 +31,20 @@ export const copy = {
     home: "Početna",
     deck: "Zamene",
     garage: "Garaža",
-    start: "Počni",
+    start: "Kreni",
   },
 
   car: {
     add: "Dodaj svoj auto",
     yours: "Tvoj auto",
-    edit: "Izmeni auto",
+    edit: "Promeni auto",
     remove: "Ukloni moj auto",
   },
 
   budget: {
     chip: (amount: string) => `Doplata do ${amount}`,
     title: "Doplata",
-    subtitle: "Koliko najviše možeš da dodaš uz svoj auto?",
+    subtitle: "Koliko najviše dodaješ uz svoj auto?",
     inBudget: "U tvom budžetu",
     evenSwap: "Ključ za ključ",
     sliderLabel: "Najveća doplata",
@@ -50,7 +54,7 @@ export const copy = {
     price: "Cena",
     priceLower: "cena",
     evenValue: "Ključ za ključ",
-    cashBackSuffix: "i tebi ostaje",
+    cashBackSuffix: "i još dobijaš",
     overBudget: (amount: string) => `${amount} preko budžeta`,
     noTradeIn: "Bez zamene",
     canSwap: "Može zamena",
@@ -71,16 +75,15 @@ export const copy = {
       undo: "vrati",
     },
     loading: "Mešamo karte…",
-    left: "Preostalo u špilu:",
-    savedToast: "Sačuvano u garaži",
+    savedToast: "Parkirano u garaži",
     matchToast: "Može zamena",
     emptyTitleCar: "To je sve u tvom budžetu",
     emptyTitleNoCar: "To je sve za sada",
     emptyBodyNoCar: "Dodaj svoj auto i za svaki od njih vidiš tačnu doplatu.",
-    emptyBodyNoMore: "Novi automobili stižu redovno. Navrati opet.",
+    emptyBodyNoMore: "Nova vozila stižu redovno. Navrati opet.",
     emptyRaise: (budget: string, cars: string) => `Sa doplatom do ${budget} u igri je još ${cars}.`,
     raiseTo: (budget: string) => `Podigni na ${budget}`,
-    restorePassed: "Pogledaj preskočene",
+    restorePassed: "Vrati preskočene",
     openGarage: "Otvori garažu",
   },
 
@@ -89,7 +92,7 @@ export const copy = {
     listingPrice: "Cena automobila",
     yourCarCredit: "Tvoj auto u zamenu",
     topUp: "Doplata",
-    cashBack: "Tebi ostaje",
+    cashBack: "Dobijaš",
     rangeNote: (low: string, high: string) =>
       `U zamenu tvoj auto vredi okvirno od ${low} do ${high}. Konačan iznos daje auto-kuća kad pogleda vozilo.`,
     notAcceptedAge: (years: number) => `Ova auto-kuća ne uzima u zamenu vozila starija od ${years} god.`,
@@ -104,7 +107,7 @@ export const copy = {
     body: "Karoserija",
     color: "Boja",
     highlightsTitle: "Oprema i istorija",
-    dealerTitle: "Prodavac",
+    dealerTitle: "Auto-kuća",
     dealerTakes: (years: number, km: string) => `U zamenu uzima vozila do ${years} god. i do ${km}.`,
     photoBy: "Foto",
   },
@@ -120,31 +123,31 @@ export const copy = {
     kmTitle: "Kilometraža i gorivo",
     kmLabel: "Kilometraža",
     fuelLabel: "Gorivo",
-    estimate: "Proceni moj auto",
+    estimate: "Da vidimo koliko vredi",
     resultLead: "vredi oko",
     resultNote:
       "Okvirna procena prema marki, modelu, godištu, kilometraži i gorivu. Tačan iznos znaš kad auto-kuća pogleda vozilo.",
     budgetQuestion: "Koliko možeš da doplatiš?",
-    show: "Pokaži mi",
+    show: "Daj da vidim",
     stepOf: (step: number, total: number) => `Korak ${step} od ${total}`,
   },
 
   match: {
     title: "Može zamena!",
     body: (dealer: string) => `${dealer} uzima tvoj auto u zamenu.`,
-    note: "Sačuvano u garaži. Iznos je okviran dok auto-kuća ne pogleda vozilo.",
-    keepSwiping: "Nastavi",
+    note: "Parkirano u garaži. Iznos je okviran dok auto-kuća ne pogleda vozilo.",
+    keepSwiping: "Idemo dalje",
     openGarage: "Otvori garažu",
   },
 
   garage: {
     title: "Garaža",
-    saved: (count: number) => `Sačuvano: ${count}`,
-    emptyTitle: "Garaža je prazna",
-    emptyBody: "Auto koji prevučeš desno čeka te ovde, zajedno sa doplatom i prodavcem.",
-    startSwiping: "Počni da prevlačiš",
+    saved: (count: number) => `U garaži: ${count}`,
+    emptyTitle: "Garaža zvrji prazna",
+    emptyBody: "Auto koji prevučeš desno čeka te ovde, sa doplatom i auto-kućom.",
+    startSwiping: "Kreni da prevlačiš",
     keepSwiping: "Nastavi da prevlačiš",
-    remove: "Ukloni iz garaže",
+    remove: "Izbaci iz garaže",
     nextTitle: "Šta dalje?",
     nextBody: "Uskoro odavde tražiš obavezujuću ponudu auto-kuće jednim dodirom.",
   },
@@ -152,22 +155,25 @@ export const copy = {
   landing: {
     eyebrow: (city: string) => `Zamena automobila · ${city}`,
     title: "Šta tvoj auto može da postane?",
-    lead: "Reci šta voziš i koliko možeš da doplatiš. Prevuci desno ono što ti se sviđa i odmah vidiš gde može zamena.",
-    cta: "Počni da prevlačiš",
+    lead: "Reci šta voziš i koliko možeš da doplatiš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena. Bez oglasa i bez „koja je poslednja cena?“.",
+    cta: "Kreni da prevlačiš",
     ctaCar: "Unesi svoj auto",
     equationCar: "Tvoj auto",
-    exampleNote: "Ovo je primer. Unesi svoj auto za tačan račun.",
+    equationExample: "primer",
+    equationEnter: "Unesi svoj",
+    equationChange: "Promeni",
+    equationTopUp: "Doplata",
     equationEmpty: "Sa ovom doplatom još nema zamene. Povuci klizač udesno.",
     garage: "Garaža",
-    howTitle: "Kako radi",
+    howTitle: "Kako ide zamena",
     steps: [
       {
         title: "Reci šta voziš",
-        body: "Marka, model, godište, kilometraža. Okvirnu vrednost vidiš za deset sekundi.",
+        body: "Marka, model, godište, kilometraža. Za deset sekundi znaš koliko okvirno vredi.",
       },
       {
         title: "Prevlači",
-        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko doplaćuješ uz svoj auto.",
+        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko doplaćuješ.",
       },
       {
         title: "Može zamena",
@@ -182,19 +188,19 @@ export const copy = {
         body: "Ne slikaš, ne pišeš oglas i ne javljaš se na nepoznate brojeve.",
       },
       {
-        title: "Doplata umesto cene",
-        body: "Ne računaš napamet. Za svaki auto vidiš koliko dodaješ uz svoj.",
+        title: "Bez „poslednja cena?“",
+        body: "Doplatu vidiš unapred, na svakoj kartici. Nema cenkanja u porukama.",
       },
       {
         title: "Jedan dolazak",
         body: "Dovezeš svoj, odvezeš drugi. Ne čekaš da se tvoj prvo proda.",
       },
       {
-        title: "Provera pre potpisa",
+        title: "Provereno pre potpisa",
         body: "Istorija vozila, zaloga i lizing proveravaju se pre nego što bilo šta potpišeš.",
       },
     ],
-    faqTitle: "Pitanja",
+    faqTitle: "Česta pitanja",
     faq: [
       {
         q: "Da li je procena mog auta konačna?",
@@ -202,7 +208,7 @@ export const copy = {
       },
       {
         q: "Šta ako je auto koji želim jeftiniji od mog?",
-        a: "Onda razlika ostaje tebi. Na kartici piše koliko.",
+        a: "Onda razliku dobijaš ti. Na kartici piše koliko.",
       },
       {
         q: "Moram li da ostavim broj telefona?",

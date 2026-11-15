@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Design tokens. The palette is the Serbian tricolour, each colour with one
-   job: navy is the room everything sits in, white is for words and numbers,
-   and red is reserved for the brand and for whatever the visitor can do.
-   Car photos bring every other colour.
+   Design tokens. Three colours, each with one job:
+
+   - paper  the page and its surfaces: warm, light, easy to read outdoors
+   - ink    words and numbers, and "dalje"
+   - red    the brand, and whatever the visitor can do: like, "menjam", go
+
+   Car photos bring every other colour. Anything that sits on a photo or on
+   solid red opts into `dark-surface`, which flips the text tokens to light.
    ───────────────────────────────────────────────────────────────────────── */
 
 @theme inline {
@@ -13,82 +17,70 @@
 }
 
 @theme {
-  /* Blue: deep navy surfaces, darkest to lightest */
-  --color-canvas: #090e20;
-  --color-surface: #0f1730;
-  --color-raised: #17213f;
-  --color-hover: #202d52;
-  --color-line: rgb(160 184 255 / 0.1);
-  --color-line-strong: rgb(160 184 255 / 0.2);
+  /* Paper: the page, then surfaces that sit on it */
+  --color-canvas: #f8f4ee;
+  --color-surface: #ffffff;
+  --color-raised: #f0ebe3;
+  --color-hover: #e6dfd4;
+  --color-line: rgb(34 24 14 / 0.1);
+  --color-line-strong: rgb(34 24 14 / 0.2);
 
-  /* White: text, with blue-greys for the quieter levels */
-  --color-fg: #f6f7fb;
-  --color-fg-muted: #a9b4d0;
-  --color-fg-faint: #7d89aa;
+  /* Ink: text, at three strengths */
+  --color-fg: #1a1512;
+  --color-fg-muted: #5c534a;
+  --color-fg-faint: #6e655b;
 
-  /* Red: the brand and every primary action (like, "menjam", calls to action).
-     `strong` is for hover and for large red surfaces, where white text needs
-     more contrast; `soft` stays readable as small marks on navy. */
+  /* Red: the brand and every primary action. `strong` is for hover, for red
+     text on paper, and for large red surfaces under white text; `soft` is the
+     red that stays visible as a small mark on a dark photo. */
   --color-accent: #db2b39;
   --color-accent-strong: #c2202e;
   --color-accent-soft: #ff6b70;
   --color-on-accent: #ffffff;
 
-  /* Lighter blues: "dalje", labels, focus rings */
-  --color-pass: #5a86ff;
-  --color-sky: #8db0ff;
+  /* "Dalje": ink on paper */
+  --color-pass: #1a1512;
 
   /* Things that need a second look */
-  --color-warn: #ffc44d;
+  --color-warn: #96580a;
 
-  /* The visitor's car is always drawn as a licence plate */
-  --color-plate: #f6f7fb;
-  --color-plate-ink: #0b1226;
-  --color-plate-band: #1f4fd8;
+  /* The visitor's own car is always a white chip, whatever it sits on */
+  --color-chip: #ffffff;
+  --color-chip-ink: #1a1512;
 
   --radius-card: 2rem;
   --radius-sheet: 2rem;
 
-  --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.07) inset, 0 30px 60px -20px rgb(0 0 0 / 0.75);
-  --shadow-float: 0 12px 32px -8px rgb(2 5 16 / 0.7);
-  --shadow-accent: 0 10px 26px -10px rgb(219 43 57 / 0.75);
+  --shadow-card: 0 28px 56px -22px rgb(58 32 12 / 0.45), 0 3px 10px rgb(58 32 12 / 0.1);
+  --shadow-float: 0 10px 24px -10px rgb(58 32 12 / 0.35), 0 1px 3px rgb(58 32 12 / 0.1);
+  --shadow-chip: 0 1px 2px rgb(58 32 12 / 0.12);
+  --shadow-accent: 0 10px 22px -10px rgb(219 43 57 / 0.7);
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --animate-float: float 7s ease-in-out infinite;
   --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
-
-  @keyframes float {
-    0%,
-    100% {
-      translate: 0 0;
-    }
-    50% {
-      translate: 0 -8px;
-    }
-  }
 
   @keyframes pulse-ring {
     0% {
-      box-shadow: 0 0 0 0 rgb(246 247 251 / 0.45);
+      box-shadow: 0 0 0 0 rgb(219 43 57 / 0.5);
     }
     100% {
-      box-shadow: 0 0 0 16px rgb(246 247 251 / 0);
+      box-shadow: 0 0 0 14px rgb(219 43 57 / 0);
     }
   }
 }
 
-/* The ambient glow behind the deck follows the top card's photo. Registering
+/* The page behind the deck takes a wash of the top card's colour. Registering
    the property lets the colour itself transition. */
 @property --glow {
   syntax: "<color>";
   inherits: true;
-  initial-value: #2b4ba8;
+  initial-value: #e8c9a8;
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     background: var(--color-canvas);
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
@@ -108,7 +100,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-sky);
+    outline: 2px solid var(--color-fg);
     outline-offset: 3px;
   }
 
@@ -133,25 +125,35 @@
   }
 }
 
-/* Frosted surface for chips that sit on top of photos. */
-@utility glass {
-  background: rgb(12 12 15 / 0.55);
-  backdrop-filter: blur(16px) saturate(1.6);
-  -webkit-backdrop-filter: blur(16px) saturate(1.6);
-  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1) inset;
+/* For anything drawn on a photo or on solid red: the same token names, with
+   light text and dark surfaces, so components inside need no second set of
+   classes. */
+@utility dark-surface {
+  --color-canvas: #100d0b;
+  --color-surface: #181412;
+  --color-raised: #221d1a;
+  --color-hover: #2d2723;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-line-strong: rgb(255 255 255 / 0.2);
+  --color-fg: #faf7f2;
+  --color-fg-muted: #bdb4aa;
+  --color-fg-faint: #91887e;
+  --color-pass: #100d0b;
+  --color-warn: #ffc44d;
+  color: var(--color-fg);
 }
 
-/* Film grain, so large dark areas do not band. */
+/* Film grain, so large flat areas of colour do not look printed by a machine. */
 @utility grain {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 160px 160px;
 }
 
-/* Ambient light that takes its colour from --glow. */
+/* A wash of colour taken from --glow, strongest at the top of the page. */
 @utility ambient {
   background:
-    radial-gradient(90% 60% at 50% -5%, color-mix(in oklab, var(--glow) 34%, transparent) 0%, transparent 70%),
-    radial-gradient(70% 45% at 50% 105%, color-mix(in oklab, var(--glow) 16%, transparent) 0%, transparent 75%);
+    radial-gradient(95% 60% at 50% -8%, color-mix(in oklab, var(--glow) 42%, transparent) 0%, transparent 72%),
+    radial-gradient(70% 40% at 50% 108%, color-mix(in oklab, var(--glow) 20%, transparent) 0%, transparent 75%);
   transition: --glow 700ms ease;
 }
 
@@ -192,11 +194,9 @@
   height: 2rem;
   margin-top: -0.6875rem;
   border-radius: 50%;
-  border: 0;
-  background: var(--color-fg);
-  box-shadow:
-    0 2px 10px rgb(0 0 0 / 0.55),
-    0 0 0 6px rgb(219 43 57 / 0.3);
+  border: 0.1875rem solid var(--color-accent);
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgb(58 32 12 / 0.3);
   transition:
     scale 160ms var(--ease-out-expo),
     box-shadow 160ms var(--ease-out-expo);
@@ -205,8 +205,8 @@
 .slider:active::-webkit-slider-thumb {
   scale: 1.12;
   box-shadow:
-    0 2px 10px rgb(0 0 0 / 0.55),
-    0 0 0 10px rgb(219 43 57 / 0.4);
+    0 3px 10px rgb(58 32 12 / 0.3),
+    0 0 0 9px rgb(219 43 57 / 0.2);
 }
 
 .slider::-moz-range-track {
@@ -222,14 +222,12 @@
 }
 
 .slider::-moz-range-thumb {
-  width: 2rem;
-  height: 2rem;
+  width: 1.625rem;
+  height: 1.625rem;
   border-radius: 50%;
-  border: 0;
-  background: var(--color-fg);
-  box-shadow:
-    0 2px 10px rgb(0 0 0 / 0.55),
-    0 0 0 6px rgb(219 43 57 / 0.3);
+  border: 0.1875rem solid var(--color-accent);
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgb(58 32 12 / 0.3);
 }
 
 .slider:focus-visible {
@@ -237,12 +235,12 @@
 }
 
 .slider:focus-visible::-webkit-slider-thumb {
-  outline: 2px solid var(--color-sky);
+  outline: 2px solid var(--color-fg);
   outline-offset: 4px;
 }
 
 .slider:focus-visible::-moz-range-thumb {
-  outline: 2px solid var(--color-sky);
+  outline: 2px solid var(--color-fg);
   outline-offset: 4px;
 }
 
