@@ -1,0 +1,381 @@
+@import "tailwindcss";
+
+/* A phone browser with its address bar showing leaves about 650px of height,
+   which is what most visitors get. `short:` tightens the deck there so the
+   photo keeps its share of the card. The same tightening applies inside
+   anything marked `data-compact`, such as the phone drawn on the landing page,
+   whose screen is that small whatever the window around it. */
+@custom-variant short {
+  @media (max-height: 46rem) {
+    @slot;
+  }
+  &:where([data-compact] *) {
+    @slot;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens. Three colours, each with one job:
+
+   - paper  the page and its surfaces: warm, light, easy to read outdoors
+   - ink    words and numbers, and "dalje"
+   - red    the brand, and whatever the visitor can do: like, "menjam", go
+
+   Car photos bring every other colour. Anything that sits on a photo or on
+   solid red opts into `dark-surface`, which flips the text tokens to light.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  /* Paper: the page, then surfaces that sit on it */
+  --color-canvas: #f8f4ee;
+  --color-surface: #ffffff;
+  --color-raised: #f0ebe3;
+  --color-hover: #e6dfd4;
+  --color-line: rgb(34 24 14 / 0.1);
+  --color-line-strong: rgb(34 24 14 / 0.2);
+
+  /* Ink: text, at three strengths */
+  --color-fg: #1a1512;
+  --color-fg-muted: #5c534a;
+  --color-fg-faint: #6e655b;
+
+  /* Red: the brand and every primary action. `strong` is for hover, for red
+     text on paper, and for large red surfaces under white text; `soft` is the
+     red that stays visible as a small mark on a dark photo. */
+  --color-accent: #db2b39;
+  --color-accent-strong: #c2202e;
+  --color-accent-soft: #ff6b70;
+  --color-on-accent: #ffffff;
+
+  /* "Dalje": ink on paper */
+  --color-pass: #1a1512;
+
+  /* Things that need a second look */
+  --color-warn: #96580a;
+
+  /* The visitor's own car is always a white chip, whatever it sits on */
+  --color-chip: #ffffff;
+  --color-chip-ink: #1a1512;
+
+  --radius-card: 2rem;
+  --radius-sheet: 2rem;
+
+  --shadow-card: 0 28px 56px -22px rgb(58 32 12 / 0.45), 0 3px 10px rgb(58 32 12 / 0.1);
+  --shadow-float: 0 10px 24px -10px rgb(58 32 12 / 0.35), 0 1px 3px rgb(58 32 12 / 0.1);
+  --shadow-chip: 0 1px 2px rgb(58 32 12 / 0.12);
+  --shadow-accent: 0 10px 22px -10px rgb(219 43 57 / 0.7);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
+
+  @keyframes pulse-ring {
+    0% {
+      box-shadow: 0 0 0 0 rgb(219 43 57 / 0.5);
+    }
+    100% {
+      box-shadow: 0 0 0 14px rgb(219 43 57 / 0);
+    }
+  }
+}
+
+/* The page behind the deck takes a wash of the top card's colour. Registering
+   the property lets the colour itself transition. */
+@property --glow {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e8c9a8;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    background: var(--color-canvas);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    letter-spacing: -0.011em;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-fg);
+    outline-offset: 3px;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+/* ── Utilities ─────────────────────────────────────────────────────────── */
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* For anything drawn on a photo or on solid red: the same token names, with
+   light text and dark surfaces, so components inside need no second set of
+   classes. */
+@utility dark-surface {
+  --color-canvas: #100d0b;
+  --color-surface: #181412;
+  --color-raised: #221d1a;
+  --color-hover: #2d2723;
+  --color-line: rgb(255 255 255 / 0.1);
+  --color-line-strong: rgb(255 255 255 / 0.2);
+  --color-fg: #faf7f2;
+  --color-fg-muted: #bdb4aa;
+  --color-fg-faint: #91887e;
+  --color-pass: #100d0b;
+  --color-warn: #ffc44d;
+  color: var(--color-fg);
+}
+
+/* Film grain, so large flat areas of colour do not look printed by a machine. */
+@utility grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* A wash of colour taken from --glow, strongest at the top of the page. */
+@utility ambient {
+  background:
+    radial-gradient(95% 60% at 50% -8%, color-mix(in oklab, var(--glow) 42%, transparent) 0%, transparent 72%),
+    radial-gradient(70% 40% at 50% 108%, color-mix(in oklab, var(--glow) 20%, transparent) 0%, transparent 75%);
+  transition: --glow 700ms ease;
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+/* ── Range slider ──────────────────────────────────────────────────────── */
+
+.slider {
+  --fill: 0%;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 2.75rem;
+  background: transparent;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.slider:active {
+  cursor: grabbing;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 0.625rem;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--color-accent) 0 var(--fill), var(--color-hover) var(--fill) 100%);
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 2rem;
+  height: 2rem;
+  margin-top: -0.6875rem;
+  border-radius: 50%;
+  border: 0.1875rem solid var(--color-accent);
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgb(58 32 12 / 0.3);
+  transition:
+    scale 160ms var(--ease-out-expo),
+    box-shadow 160ms var(--ease-out-expo);
+}
+
+.slider:active::-webkit-slider-thumb {
+  scale: 1.12;
+  box-shadow:
+    0 3px 10px rgb(58 32 12 / 0.3),
+    0 0 0 9px rgb(219 43 57 / 0.2);
+}
+
+.slider::-moz-range-track {
+  height: 0.625rem;
+  border-radius: 999px;
+  background: var(--color-hover);
+}
+
+.slider::-moz-range-progress {
+  height: 0.625rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+.slider::-moz-range-thumb {
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 50%;
+  border: 0.1875rem solid var(--color-accent);
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgb(58 32 12 / 0.3);
+}
+
+.slider:focus-visible {
+  outline: none;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 4px;
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 4px;
+}
+
+/* ── Page transitions ──────────────────────────────────────────────────── */
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(.nav-forward) {
+  --slide-offset: -48px;
+  animation:
+    140ms ease-in both vt-fade reverse,
+    380ms var(--ease-out-expo) both vt-slide reverse;
+}
+
+::view-transition-new(.nav-forward) {
+  --slide-offset: 48px;
+  animation:
+    220ms ease-out 100ms both vt-fade,
+    380ms var(--ease-out-expo) both vt-slide;
+}
+
+::view-transition-old(.nav-back) {
+  --slide-offset: 48px;
+  animation:
+    140ms ease-in both vt-fade reverse,
+    380ms var(--ease-out-expo) both vt-slide reverse;
+}
+
+::view-transition-new(.nav-back) {
+  --slide-offset: -48px;
+  animation:
+    220ms ease-out 100ms both vt-fade,
+    380ms var(--ease-out-expo) both vt-slide;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vt-slide {
+  from {
+    translate: var(--slide-offset);
+  }
+  to {
+    translate: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Questions ─────────────────────────────────────────────────────────────
+   An answer slides open where the browser can animate to a height it has to
+   measure. Elsewhere it simply opens, which is what <details> has always done. */
+
+.faq {
+  interpolate-size: allow-keywords;
+}
+
+.faq::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.4s var(--ease-out-expo),
+    content-visibility 0.4s allow-discrete;
+}
+
+.faq[open]::details-content {
+  block-size: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq::details-content {
+    transition: none;
+  }
+}
+
+/* ── Scroll reveal ─────────────────────────────────────────────────────────
+   Sections rise into place as they enter the viewport. Pure CSS, and only
+   where scroll-driven animations exist; elsewhere the content is just there. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 32px;
+    scale: 0.97;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+}

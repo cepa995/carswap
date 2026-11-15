@@ -1,0 +1,170 @@
+"""Build the demo photo set for the web app from Wikimedia Commons.
+
+Reads `manifest.json` (one entry per demo car: the Commons file plus its author
+and licence) and writes:
+
+- apps/web/public/seed/cars/<id>.webp     the photo, resized
+- apps/web/assets/share-photos/<id>.jpg   a small JPEG crop for link-preview images
+- apps/web/src/lib/seed/photos.json       size, blur backdrop and credit per car
+- apps/web/public/seed/ATTRIBUTION.md     author, licence and source for every photo
+
+Run from the repository root:
+
+    uv run --with pillow python scripts/seed-photos/build.py
+
+Downloads are cached in scripts/seed-photos/.cache, so re-runs are offline.
+"""
+
+from __future__ import annotations
+
+import base64
+import hashlib
+import io
+import json
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+from PIL import Image, ImageFilter, ImageOps
+
+ROOT = Path(__file__).resolve().parents[2]
+HERE = Path(__file__).resolve().parent
+CACHE = HERE / ".cache"
+OUT_IMAGES = ROOT / "apps/web/public/seed/cars"
+OUT_SHARE = ROOT / "apps/web/assets/share-photos"
+OUT_JSON = ROOT / "apps/web/src/lib/seed/photos.json"
+OUT_ATTRIBUTION = ROOT / "apps/web/public/seed/ATTRIBUTION.md"
+
+API = "https://commons.wikimedia.org/w/api.php"
+USER_AGENT = "seed-photo-builder/0.1"
+MAX_ATTEMPTS = 6
+PAUSE_SECONDS = 2.0
+FETCH_WIDTH = 1920
+OUTPUT_WIDTH = 1280
+WEBP_QUALITY = 78
+# The renderer behind link previews reads JPEG and PNG, not WebP, and the photo
+# sits in a 3:2 box there. Small on purpose: the preview is re-encoded as PNG.
+SHARE_SIZE = (600, 400)
+SHARE_QUALITY = 76
+BACKDROP_SIZE = (96, 64)
+# On the 2x intermediate. High enough that street furniture and skylines melt into broad zones of colour.
+BACKDROP_BLUR = 28
+
+
+def http_get(url: str) -> bytes:
+    """GET with patience: Commons answers 429 when asked too quickly."""
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    for attempt in range(MAX_ATTEMPTS):
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return response.read()
+        except urllib.error.HTTPError as error:
+            last_try = attempt == MAX_ATTEMPTS - 1
+            if error.code not in (429, 500, 502, 503, 504) or last_try:
+                raise
+            retry_after = error.headers.get("Retry-After", "")
+            wait = int(retry_after) if retry_after.isdigit() else 5 * 2**attempt
+            print(f"  HTTP {error.code}, waiting {wait}s")
+            time.sleep(wait)
+    raise RuntimeError("unreachable")
+
+
+def thumb_url(title: str) -> str:
+    query = urllib.parse.urlencode(
+        {
+            "action": "query",
+            "format": "json",
+            "titles": title,
+            "prop": "imageinfo",
+            "iiprop": "url|size",
+            "iiurlwidth": FETCH_WIDTH,
+        }
+    )
+    data = json.loads(http_get(f"{API}?{query}"))
+    page = next(iter(data["query"]["pages"].values()))
+    info = page["imageinfo"][0]
+    return info.get("thumburl") or info["url"]
+
+
+def fetch(entry: dict) -> Image.Image:
+    CACHE.mkdir(exist_ok=True)
+    # Keyed by the Commons title too, so swapping a car's photo in the manifest refetches it.
+    title_key = hashlib.sha1(entry["commonsTitle"].encode("utf-8")).hexdigest()[:10]
+    cached = CACHE / f"{entry['id']}-{title_key}.jpg"
+    if not cached.exists():
+        url = thumb_url(entry["commonsTitle"])
+        time.sleep(PAUSE_SECONDS)
+        cached.write_bytes(http_get(url))
+        time.sleep(PAUSE_SECONDS)
+    return Image.open(cached).convert("RGB")
+
+
+def backdrop_data_url(image: Image.Image) -> str:
+    """The whole photo, tiny and heavily blurred.
+
+    The card lays it over the photo's own box and stretches it, so the colours
+    at the top of the photo continue above it and the ground continues below.
+    """
+    small = image.resize((BACKDROP_SIZE[0] * 2, BACKDROP_SIZE[1] * 2), Image.LANCZOS)
+    small = small.filter(ImageFilter.GaussianBlur(BACKDROP_BLUR)).resize(BACKDROP_SIZE, Image.LANCZOS)
+    buffer = io.BytesIO()
+    small.save(buffer, "WEBP", quality=55, method=6)
+    return "data:image/webp;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
+def main() -> None:
+    manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
+    OUT_IMAGES.mkdir(parents=True, exist_ok=True)
+    OUT_SHARE.mkdir(parents=True, exist_ok=True)
+
+    photos: dict[str, dict] = {}
+    lines = [
+        "# Photo credits",
+        "",
+        "Demo listing photos come from Wikimedia Commons. Each file was resized and",
+        "re-encoded as WebP; nothing else was changed. Link-preview images use a",
+        "smaller JPEG copy of the same photo, cropped to 3:2, and print its credit.",
+        "The licences below apply to the photos, not to the rest of this repository.",
+        "",
+        "| File | Author | Licence | Source |",
+        "| --- | --- | --- | --- |",
+    ]
+
+    for entry in manifest:
+        image = fetch(entry)
+        if image.width > OUTPUT_WIDTH:
+            height = round(image.height * OUTPUT_WIDTH / image.width)
+            image = image.resize((OUTPUT_WIDTH, height), Image.LANCZOS)
+        target = OUT_IMAGES / f"{entry['id']}.webp"
+        image.save(target, "WEBP", quality=WEBP_QUALITY, method=6)
+        ImageOps.fit(image, SHARE_SIZE, Image.LANCZOS).save(
+            OUT_SHARE / f"{entry['id']}.jpg", "JPEG", quality=SHARE_QUALITY, optimize=True
+        )
+
+        photos[entry["id"]] = {
+            "src": f"/seed/cars/{entry['id']}.webp",
+            "width": image.width,
+            "height": image.height,
+            "blur": backdrop_data_url(image),
+            "credit": {
+                "author": entry["author"],
+                "license": entry["license"],
+                "licenseUrl": entry.get("licenseUrl") or "",
+                "sourceUrl": entry["pageUrl"],
+            },
+        }
+        licence = (
+            f"[{entry['license']}]({entry['licenseUrl']})" if entry.get("licenseUrl") else entry["license"]
+        )
+        lines.append(f"| `cars/{entry['id']}.webp` | {entry['author']} | {licence} | [Commons]({entry['pageUrl']}) |")
+        print(f"{entry['id']:<22} {image.width}x{image.height}  {target.stat().st_size // 1024:>4} kB")
+
+    OUT_JSON.write_text(json.dumps(photos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    OUT_ATTRIBUTION.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"\n{len(photos)} photos → {OUT_IMAGES.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

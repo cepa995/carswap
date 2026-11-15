@@ -1,0 +1,482 @@
+[
+  {
+    "id": "vw-golf-7",
+    "commonsTitle": "File:VW Golf 7 (11140034514).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:VW_Golf_7_(11140034514).jpg",
+    "author": "Robert Basic",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "originalWidth": 5184,
+    "originalHeight": 3456,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "hatchback",
+      "generationNote": "Golf VII pre-facelift (2013), 5-door",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "skoda-octavia-3",
+    "commonsTitle": "File:2013 Skoda Octavia III RS (Typ 5E) 2.0 TSI Rio-Rot-Metallic Vorderansicht Nockalmstrasse.JPG",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:2013_Skoda_Octavia_III_RS_(Typ_5E)_2.0_TSI_Rio-Rot-Metallic_Vorderansicht_Nockalmstrasse.JPG",
+    "author": "Kickaffe (Mario von Berg)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "originalWidth": 2000,
+    "originalHeight": 1215,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "hatchback",
+      "generationNote": "Octavia III RS, pre-facelift (2013), liftback (5-door)",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "vw-passat-b8",
+    "commonsTitle": "File:Volkswagen Passat B8 R-Line (2014) IMG 5443.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Volkswagen_Passat_B8_R-Line_(2014)_IMG_5443.jpg",
+    "author": "Alexander Migl",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 4673,
+    "originalHeight": 2598,
+    "pictured": {
+      "color": "beige",
+      "bodyStyle": "sedan",
+      "generationNote": "Passat B8 pre-facelift (2014), R-Line sedan",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "audi-a4-b9",
+    "commonsTitle": "File:2015 Audi A4 B9 3.0 TDI quattro V6 200 kW S line Tangorot Vorderansicht.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:2015_Audi_A4_B9_3.0_TDI_quattro_V6_200_kW_S_line_Tangorot_Vorderansicht.jpg",
+    "author": "Kickaffe (Mario von Berg)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 2000,
+    "originalHeight": 1190,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "sedan",
+      "generationNote": "A4 B9 pre-facelift (2015), S line sedan",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "bmw-3-f30",
+    "commonsTitle": "File:BMW 335i in Munich.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:BMW_335i_in_Munich.jpg",
+    "author": "High Contrast",
+    "license": "CC BY 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/de/deed.en",
+    "originalWidth": 4000,
+    "originalHeight": 2400,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "sedan",
+      "generationNote": "3 Series F30 pre-facelift (2012), 335i sedan; display car with a 'BMW 335i' model plate instead of a registration",
+      "view": "front three-quarter, driver side, low angle"
+    }
+  },
+  {
+    "id": "mercedes-c-w205",
+    "commonsTitle": "File:Mercedes-Benz C300E Plug-In-Hybrid.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Mercedes-Benz_C300E_Plug-In-Hybrid.jpg",
+    "author": "JoachimKohler-HB",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 4800,
+    "originalHeight": 3000,
+    "pictured": {
+      "color": "black",
+      "bodyStyle": "sedan",
+      "generationNote": "C-Class W205 facelift (2018 onward), C 300 e plug-in hybrid sedan, charging cable plugged in at the rear",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "opel-astra-j",
+    "commonsTitle": "File:Opel Astra J Modellpflege Front.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Opel_Astra_J_Modellpflege_Front.jpg",
+    "author": "Nordenfan",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 5184,
+    "originalHeight": 3456,
+    "pictured": {
+      "color": "white",
+      "bodyStyle": "hatchback",
+      "generationNote": "Astra J facelift (2012-2015), 5-door",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "opel-insignia-a",
+    "commonsTitle": "File:Opel Insignia Sports Tourer 2010 (33654968540).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Opel_Insignia_Sports_Tourer_2010_(33654968540).jpg",
+    "author": "richwood",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "originalWidth": 4377,
+    "originalHeight": 2463,
+    "pictured": {
+      "color": "silver",
+      "bodyStyle": "wagon",
+      "generationNote": "Insignia A pre-facelift (2010), Sports Tourer estate",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "renault-clio-4",
+    "commonsTitle": "File:Renault Clio Dynamique ENERGY TCe 90 Start & Stop eco² (IV) – Frontansicht, 13. Juli 2014, Ratingen.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Renault_Clio_Dynamique_ENERGY_TCe_90_Start_%26_Stop_eco%C2%B2_(IV)_%E2%80%93_Frontansicht,_13._Juli_2014,_Ratingen.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 3318,
+    "originalHeight": 2136,
+    "pictured": {
+      "color": "yellow",
+      "bodyStyle": "hatchback",
+      "generationNote": "Clio IV pre-facelift (phase 1), 5-door",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "renault-megane-4",
+    "commonsTitle": "File:Renault Mégane en Matosinhos.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Renault_M%C3%A9gane_en_Matosinhos.jpg",
+    "author": "Bene Riobó",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 5205,
+    "originalHeight": 3470,
+    "pictured": {
+      "color": "white",
+      "bodyStyle": "hatchback",
+      "generationNote": "Mégane IV pre-facelift (phase 1), 5-door hatchback",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "peugeot-308-2",
+    "commonsTitle": "File:2020 - Peugeot 308 II (B) - 55.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:2020_-_Peugeot_308_II_(B)_-_55.jpg",
+    "author": "A.BourgeoisP",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 5637,
+    "originalHeight": 3586,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "hatchback",
+      "generationNote": "308 II facelift (2017-2021), 5-door, GT Line/GT front (chequered grille, red Peugeot lettering)",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "peugeot-208-1",
+    "commonsTitle": "File:Peugeot 208 95 VTi Active – Frontansicht, 5. Mai 2012, Düsseldorf.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Peugeot_208_95_VTi_Active_%E2%80%93_Frontansicht,_5._Mai_2012,_D%C3%BCsseldorf.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 3215,
+    "originalHeight": 1967,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "hatchback",
+      "generationNote": "208 first generation pre-facelift (2012), 3-door; dark red",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "fiat-500l",
+    "commonsTitle": "File:Fiat 500L – f 05072025.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Fiat_500L_%E2%80%93_f_05072025.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 5916,
+    "originalHeight": 3614,
+    "pictured": {
+      "color": "white",
+      "bodyStyle": "mpv",
+      "generationNote": "500L pre-facelift (2012-2017), white with black roof",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "fiat-punto",
+    "commonsTitle": "File:Fiat Grande Punto Dynamic 2dr Skydome 1.4 8V 2007 front.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Fiat_Grande_Punto_Dynamic_2dr_Skydome_1.4_8V_2007_front.jpg",
+    "author": "TeEmKah",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 3872,
+    "originalHeight": 2592,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "hatchback",
+      "generationNote": "Grande Punto (199), 2007, 3-door",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "ford-focus-3",
+    "commonsTitle": "File:Ford Focus Turnier Titanium (III) – Frontansicht, 18. September 2011, Mettmann.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Ford_Focus_Turnier_Titanium_(III)_%E2%80%93_Frontansicht,_18._September_2011,_Mettmann.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 2385,
+    "originalHeight": 1334,
+    "pictured": {
+      "color": "black",
+      "bodyStyle": "wagon",
+      "generationNote": "Focus Mk3 pre-facelift (2011), Turnier estate, Titanium trim",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "ford-fiesta-7",
+    "commonsTitle": "File:Ford Fiesta Mk7 20090223 front.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Ford_Fiesta_Mk7_20090223_front.jpg",
+    "author": "M 93",
+    "license": "Public domain",
+    "licenseUrl": "",
+    "originalWidth": 3240,
+    "originalHeight": 2008,
+    "pictured": {
+      "color": "green",
+      "bodyStyle": "hatchback",
+      "generationNote": "Fiesta 2008-2012 pre-facelift (sixth generation, sold as Mk7 in some markets), 3-door",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "toyota-yaris-3",
+    "commonsTitle": "File:Toyota Yaris 1.33 Dual VVT-i Comfort (XP130, Facelift) – Frontansicht, 17. August 2014, Düsseldorf.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Toyota_Yaris_1.33_Dual_VVT-i_Comfort_(XP130,_Facelift)_%E2%80%93_Frontansicht,_17._August_2014,_D%C3%BCsseldorf.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 3442,
+    "originalHeight": 2013,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "hatchback",
+      "generationNote": "Yaris XP130, 2014 facelift, 5-door",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "hyundai-tucson-tl",
+    "commonsTitle": "File:Hyundai Tucson 2015 (22190428448).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Hyundai_Tucson_2015_(22190428448).jpg",
+    "author": "Kārlis Dambrāns",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "originalWidth": 4896,
+    "originalHeight": 3264,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "suv",
+      "generationNote": "Tucson TL pre-facelift (2015)",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "kia-sportage-4",
+    "commonsTitle": "File:Kia Sportage 2.0 CRDi AWD Platinum Edition (IV) – Frontansicht, 21. Februar 2016, Düsseldorf.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Kia_Sportage_2.0_CRDi_AWD_Platinum_Edition_(IV)_%E2%80%93_Frontansicht,_21._Februar_2016,_D%C3%BCsseldorf.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 3422,
+    "originalHeight": 1949,
+    "pictured": {
+      "color": "white",
+      "bodyStyle": "suv",
+      "generationNote": "Sportage QL pre-facelift (2016)",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "dacia-duster-1",
+    "commonsTitle": "File:Dacia Duster Urban Explorer Altai Gruen.JPG",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Dacia_Duster_Urban_Explorer_Altai_Gruen.JPG",
+    "author": "Usien",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "originalWidth": 5184,
+    "originalHeight": 3456,
+    "pictured": {
+      "color": "green",
+      "bodyStyle": "suv",
+      "generationNote": "Duster first generation, 2013 facelift, Urban Explorer edition; olive green",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "nissan-qashqai-j11",
+    "commonsTitle": "File:Qashqai J11b N-CONNECTA.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Qashqai_J11b_N-CONNECTA.jpg",
+    "author": "Grossk",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 3044,
+    "originalHeight": 2283,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "suv",
+      "generationNote": "Qashqai J11 facelift (2017 onward), N-Connecta",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "vw-tiguan-1",
+    "commonsTitle": "File:VW Tiguan Sport & Style 2.0 TDI 4MOTION BlueMotion Technology (Facelift) – Frontansicht, 14. August 2011, Velbert.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:VW_Tiguan_Sport_%26_Style_2.0_TDI_4MOTION_BlueMotion_Technology_(Facelift)_%E2%80%93_Frontansicht,_14._August_2011,_Velbert.jpg",
+    "author": "M 93",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 2514,
+    "originalHeight": 1484,
+    "pictured": {
+      "color": "brown",
+      "bodyStyle": "suv",
+      "generationNote": "Tiguan first generation, 2011 facelift, Sport & Style",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "seat-leon-3",
+    "commonsTitle": "File:Gdansk Seat Leon.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Gdansk_Seat_Leon.jpg",
+    "author": "Andrzej Otrębski",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 6000,
+    "originalHeight": 4000,
+    "pictured": {
+      "color": "blue",
+      "bodyStyle": "wagon",
+      "generationNote": "León Mk3 (5F) ST estate, 2017 facelift",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "skoda-fabia-3",
+    "commonsTitle": "File:2014 Skoda Fabia III Typ NJ3 1.2 TSI Style Metall-Grau-Metallic Vorderansicht.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:2014_Skoda_Fabia_III_Typ_NJ3_1.2_TSI_Style_Metall-Grau-Metallic_Vorderansicht.jpg",
+    "author": "Kickaffe (Mario von Berg)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 2000,
+    "originalHeight": 1214,
+    "pictured": {
+      "color": "grey",
+      "bodyStyle": "hatchback",
+      "generationNote": "Fabia III pre-facelift (2014), 5-door; dark grey",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "citroen-c4-cactus",
+    "commonsTitle": "File:2014 Citroën C4 Cactus Feel Edition PureTech e-THP 110 Vorderansicht Hello Yellow Amsterdam.JPG",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:2014_Citro%C3%ABn_C4_Cactus_Feel_Edition_PureTech_e-THP_110_Vorderansicht_Hello_Yellow_Amsterdam.JPG",
+    "author": "Kickaffe (Mario von Berg)",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "originalWidth": 2000,
+    "originalHeight": 1185,
+    "pictured": {
+      "color": "yellow",
+      "bodyStyle": "suv",
+      "generationNote": "C4 Cactus pre-facelift (2014) with Airbump side panels",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "mazda-cx-5",
+    "commonsTitle": "File:Mazda CX5 French transit plate (38505741630).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Mazda_CX5_French_transit_plate_(38505741630).jpg",
+    "author": "Guillaume Vachey",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "originalWidth": 4096,
+    "originalHeight": 3061,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "suv",
+      "generationNote": "CX-5 KE, 2015 facelift",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "volvo-v40",
+    "commonsTitle": "File:Volvo V40 C1.jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Volvo_V40_C1.jpg",
+    "author": "JoachimKohler-HB",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 3600,
+    "originalHeight": 2412,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "hatchback",
+      "generationNote": "V40 second generation pre-facelift (2012-2016), 5-door",
+      "view": "front three-quarter, driver side"
+    }
+  },
+  {
+    "id": "audi-a3-8v",
+    "commonsTitle": "File:Audi A3 SportBack 2017 (front right side).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Audi_A3_SportBack_2017_(front_right_side).jpg",
+    "author": "Peulle",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalWidth": 4457,
+    "originalHeight": 2670,
+    "pictured": {
+      "color": "red",
+      "bodyStyle": "hatchback",
+      "generationNote": "A3 8V facelift (2016 onward), Sportback 5-door",
+      "view": "front three-quarter, passenger side"
+    }
+  },
+  {
+    "id": "bmw-5-f10",
+    "commonsTitle": "File:BMW 520d in Zeeuws Vlaanderen.JPG",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:BMW_520d_in_Zeeuws_Vlaanderen.JPG",
+    "author": "Charles01",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "originalWidth": 3263,
+    "originalHeight": 1958,
+    "pictured": {
+      "color": "beige",
+      "bodyStyle": "sedan",
+      "generationNote": "5 Series F10 pre-facelift (2010-2013), 520d sedan",
+      "view": "front three-quarter leaning to side view, driver side"
+    }
+  },
+  {
+    "id": "tesla-model-3",
+    "commonsTitle": "File:Tesla Model 3, Dual Motor (2024-08-25 Sp r).jpg",
+    "pageUrl": "https://commons.wikimedia.org/wiki/File:Tesla_Model_3,_Dual_Motor_(2024-08-25_Sp_r).jpg",
+    "author": "Lothar Spurzem",
+    "license": "CC BY-SA 3.0 de",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en",
+    "originalWidth": 4609,
+    "originalHeight": 3072,
+    "pictured": {
+      "color": "white",
+      "bodyStyle": "sedan",
+      "generationNote": "Model 3 pre-Highland with black trim (2021-2023 look); Dual Motor per the file title",
+      "view": "front three-quarter, driver side"
+    }
+  }
+]
