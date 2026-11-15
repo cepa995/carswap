@@ -32,9 +32,8 @@ interface CarCardProps {
  * above, so the whole car stays in view on any screen.
  */
 export function CarCard({ card, car, priority = false, embedded = false }: CarCardProps) {
-  const { listing, dealer, deal } = card;
+  const { listing } = card;
   const Title = embedded ? "h4" : "h2";
-  const display = describeDeal(deal, listing);
   const specs = [String(listing.year), formatKm(listing.km), fuelLabel[listing.fuel], gearboxLabel[listing.gearbox]];
 
   return (
@@ -56,13 +55,7 @@ export function CarCard({ card, car, priority = false, embedded = false }: CarCa
           </div>
         </div>
 
-        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-          <span className={cn(label, "max-w-[62%] truncate text-chip-ink")}>
-            {dealer.name}
-            <span className="font-medium text-chip-ink/60"> · {dealer.area}</span>
-          </span>
-          {display.flag ? <Flag flag={display.flag} /> : null}
-        </div>
+        <PhotoLabels card={card} />
       </div>
 
       <div className="shrink-0 p-5 pt-4 short:p-4 short:pt-3.5">
@@ -90,6 +83,21 @@ export function CarCard({ card, car, priority = false, embedded = false }: CarCa
 
 /** White labels that stay readable on any photo. */
 const label = "rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold shadow-chip ring-1 ring-black/[0.06]";
+
+/** Along the top of a car's photo: who is selling it, and whether a swap is on. */
+export function PhotoLabels({ card }: { card: DeckCard }) {
+  const { dealer } = card;
+  const { flag } = describeDeal(card.deal, card.listing);
+  return (
+    <div className="pointer-events-none absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+      <span className={cn(label, "max-w-[62%] truncate text-chip-ink")}>
+        {dealer.name}
+        <span className="font-medium text-chip-ink/60"> · {dealer.area}</span>
+      </span>
+      {flag ? <Flag flag={flag} /> : null}
+    </div>
+  );
+}
 
 /**
  * Lets the picture rise out of the white card instead of starting on a hard
@@ -158,7 +166,8 @@ export function DealSummary({ card, car }: { card: DeckCard; car: UserCar | null
   );
 }
 
-function CostCaption({ deal, costs }: Pick<DeckCard, "deal" | "costs">) {
+/** The two figures an ad never shows, in one line: all in on the day, and a year of registration. */
+export function CostCaption({ deal, costs }: Pick<DeckCard, "deal" | "costs">) {
   const total = allIn(deal, costs);
   const registration = formatEur(typicalRegistration(costs));
 

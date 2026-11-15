@@ -10,6 +10,7 @@ import { MyCarSheet } from "@/components/car/MyCarSheet";
 import { SwapPreference } from "@/components/car/SwapPreference";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { Button, buttonClass } from "@/components/ui/Button";
+import { ByScreen } from "@/components/ui/ByScreen";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
@@ -69,19 +70,21 @@ export function Hero() {
         <div className="absolute inset-0 grain opacity-[0.06]" />
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 pt-28 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:px-8 lg:pt-36 lg:pb-24">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 pt-28 pb-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:px-8 lg:pt-36 lg:pb-24 xl:gap-20">
         <div>
           <p className="text-xs font-semibold tracking-[0.14em] text-accent-strong uppercase">
             {copy.landing.eyebrow(brand.city)}
           </p>
-          <h1 className="mt-4 font-display text-[3.1rem] leading-[0.92] font-extrabold tracking-[-0.035em] text-balance min-[23rem]:text-[3.6rem] sm:text-7xl lg:text-[5.4rem]">
+          <h1 className="mt-4 font-display text-[3.1rem] leading-[0.92] font-extrabold tracking-[-0.035em] text-balance min-[23rem]:text-[3.6rem] sm:text-7xl lg:text-[5.4rem] xl:text-[6.25rem]">
             {copy.landing.title}
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-pretty text-fg-muted">{copy.landing.lead}</p>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-pretty text-fg-muted xl:text-xl xl:leading-relaxed">
+            <ByScreen phone={copy.landing.lead} desktop={copy.landing.leadDesktop} />
+          </p>
 
           <div className="mt-8 hidden flex-wrap gap-3 lg:flex">
             <Link href="/swipe" transitionTypes={["nav-forward"]} className={buttonClass({ size: "lg" })}>
-              {copy.landing.cta}
+              {copy.landing.ctaDesktop}
               <ArrowRight className="size-5" aria-hidden />
             </Link>
             <Button variant="secondary" size="lg" onClick={openCarSheet}>
@@ -90,7 +93,7 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative rounded-[2.25rem] bg-surface p-4 shadow-card ring-1 ring-line sm:p-6">
+        <div className="relative rounded-[2.25rem] bg-surface p-4 shadow-card ring-1 ring-line sm:p-6 xl:p-8">
           {/* Your car. The whole row is the button, so there is no doubt where to tap. */}
           <button
             type="button"
@@ -168,7 +171,7 @@ function Fan({ cards, emptyText }: { cards: DeckCard[]; emptyText: string }) {
   const ranked = [...cards].reverse();
 
   return (
-    <div className="relative mt-6 h-[8.25rem] [--step:2.1rem] min-[26rem]:[--step:2.7rem] sm:h-[9.75rem] sm:[--step:3.4rem]">
+    <div className="relative mt-6 h-[8.25rem] [--step:2.1rem] min-[26rem]:[--step:2.7rem] sm:h-[9.75rem] sm:[--step:3.4rem] xl:h-[11.75rem] xl:[--step:4.5rem]">
       <AnimatePresence initial={false}>
         {ranked.map((card, rank) => {
           const slot = FAN_SLOTS[rank];
@@ -179,7 +182,7 @@ function Fan({ cards, emptyText }: { cards: DeckCard[]; emptyText: string }) {
             <motion.div
               key={card.listing.id}
               layout={reduceMotion ? false : "position"}
-              className="absolute top-0 -ml-[4.75rem] w-[9.5rem] sm:-ml-[5.75rem] sm:w-[11.5rem]"
+              className="absolute top-0 -ml-[4.75rem] w-[9.5rem] sm:-ml-[5.75rem] sm:w-[11.5rem] xl:-ml-[7rem] xl:w-[14rem]"
               style={{ left: `calc(50% + var(--step) * ${slot})`, zIndex: 10 - distance }}
               initial={{ opacity: 0, y: 40, scale: 0.7, rotate: slot * 6 }}
               animate={{ opacity: 1, ...pose }}

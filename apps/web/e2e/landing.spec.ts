@@ -45,14 +45,16 @@ test.describe("how a swap goes, on a phone", () => {
   test("the four steps follow each other down the page", async ({ page }) => {
     const section = page.locator("section", { has: page.getByRole("heading", { name: "Kako ide zamena" }) });
 
-    await expect(section.getByRole("heading", { level: 3 })).toHaveText([
-      "Reci šta voziš",
-      "Skuplji ili jeftiniji?",
-      "Prevlači",
-      "Može zamena",
-    ]);
-    // Nothing is drawn around them and nothing is pinned: the page is the phone.
-    await expect(section.getByRole("group", { name: "Primer na telefonu" })).toBeHidden();
+    // By what is shown: a step can carry a second wording for big screens, hidden here.
+    await expect(section.getByRole("heading", { level: 3 })).toHaveText(
+      ["Reci šta voziš", "Skuplji ili jeftiniji?", "Prevlači", "Može zamena"],
+      { useInnerText: true },
+    );
+    // One under another, not side by side: the page is the phone.
+    const lefts = await section
+      .getByRole("heading", { level: 3 })
+      .evaluateAll((headings) => headings.map((heading) => Math.round(heading.getBoundingClientRect().left)));
+    expect(new Set(lefts).size).toBe(1);
   });
 
   test("the direction control is live: each answer brings a different kind of swap", async ({ page }) => {
@@ -251,24 +253,53 @@ test.describe("on the narrowest phones", () => {
   });
 });
 
-test.describe("how a swap goes, on a desktop", () => {
-  test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false });
+test.describe("how a swap goes, on a big screen", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, isMobile: false, hasTouch: false });
 
-  test("the steps take turns on a drawn phone, and a like there turns it to the match", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.goto("/");
-    const section = page.locator("section", { has: page.getByRole("heading", { name: "Kako ide zamena" }) });
-    const phone = section.getByRole("group", { name: "Primer na telefonu" });
-    const current = section.locator('li[aria-current="step"]');
+  });
 
-    await expect(phone).toBeVisible();
-    await expect(current).toContainText("Reci šta voziš");
+  test("the four steps stand side by side, and step three is about parking", async ({ page }) => {
+    const headings = page
+      .locator("section", { has: page.getByRole("heading", { name: "Kako ide zamena" }) })
+      .getByRole("heading", { level: 3 });
 
-    await section.getByRole("button", { name: /Prevlači/ }).click();
-    await expect(current).toContainText("Prevlači");
-    await phone.getByRole("button", { name: "Menjam" }).click();
+    await expect(headings).toHaveText(
+      ["Reci šta voziš", "Skuplji ili jeftiniji?", "Parkiraj šta ti se sviđa", "Može zamena"],
+      { useInnerText: true },
+    );
+    const tops = await headings.evaluateAll((all) =>
+      all.map((heading) => Math.round(heading.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size).toBe(1);
+  });
 
-    await expect(current).toContainText("Može zamena");
-    // Having been touched, the tour waits instead of moving on by itself.
-    await expect(section.getByRole("button", { name: "Pusti" })).toBeVisible();
+  test("Menjam in step three parks the car in the little garage under it", async ({ page }) => {
+    const park = step(page, "Parkiraj šta ti se sviđa");
+    // The phone's deck is in the page too, hidden: look at what is shown. And
+    // the last one shown, since a card on its way out lingers for a moment.
+    const name = park.locator("h4:visible").last();
+    const first = await name.innerText();
+
+    await park.getByRole("button", { name: /^Menjam/ }).click();
+
+    // The next car is on the card, and a bay of the garage is taken.
+    await expect(name).not.toHaveText(first);
+    await expect(park.locator("[data-bay]").first()).toBeVisible();
+    // Once the picture has landed it shows in its bay.
+    await expect(park.locator("[data-bay] img").first()).toHaveCSS("opacity", "1");
+    // And the match beside it is for a car from that garage.
+    await expect(step(page, "Može zamena")).toContainText("Može zamena!");
+  });
+
+  test("nothing on the landing page is wider than the screen", async ({ page }) => {
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    for (let top = 0; top < height; top += 600) {
+      await page.evaluate((to) => window.scrollTo({ top: to, behavior: "instant" }), top);
+      await page.waitForTimeout(120);
+    }
+
+    expect(await widerThanScreen(page)).toBe(0);
   });
 });

@@ -1,11 +1,14 @@
 "use client";
 
-import { ArrowLeftRight, Check, Heart, X } from "lucide-react";
+import { ArrowLeftRight, Check, Heart, Warehouse, X } from "lucide-react";
 import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { CarCard } from "@/components/deck/CarCard";
+import { GalleryCard } from "@/components/deck/GalleryCard";
 import { SwipeDeck, type SwipeDeckHandle } from "@/components/deck/SwipeDeck";
+import { Bays } from "@/components/garage/GaragePanel";
+import { useParking } from "@/components/garage/Parking";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { CarChip } from "@/components/ui/CarChip";
 import { track } from "@/lib/analytics";
@@ -16,6 +19,7 @@ import type { DeckCard } from "@/lib/domain/deck";
 import type { SwipeDirection } from "@/lib/domain/types";
 import { formatEur, formatKm } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
+import { useIsDesktop } from "@/lib/media";
 import { springs } from "@/lib/motion";
 import { EXAMPLE_CAR } from "@/lib/reference";
 import { listingName } from "@/lib/share";
@@ -375,6 +379,101 @@ export function SwipeScene({ phase, onMatch, fill = false }: SwipeSceneProps) {
       <p className={cn("mt-3 shrink-0 text-center text-sm text-fg-muted", fill && "[@media(max-height:50rem)]:hidden")}>
         {copy.landing.howTry}
       </p>
+    </div>
+  );
+}
+
+// ── 3, on a big screen. Parkiraj šta ti se sviđa ─────────────────────────
+
+/** Bays in the little garage under the card. When they are full, it empties for the next round. */
+const DEMO_BAYS = 3;
+/** When, left alone, the first car parks by itself. */
+const PARK_ITSELF_AFTER_MS = 1500;
+
+/**
+ * What step three is on a big screen, where nothing is swiped: one card from
+ * the app's gallery, and under it a few bays of garage. "Menjam" sends the
+ * car's picture over to a bay, exactly as it does in the app. Left alone, the
+ * first car parks by itself so the point is made without a click.
+ */
+export function ParkScene({ phase, onMatch }: SceneProps & { onMatch?: (card: DeckCard) => void }) {
+  const [waiting, setWaiting] = useState<readonly DeckCard[]>(examples.deck);
+  const [parked, setParked] = useState<readonly DeckCard[]>([]);
+  const [touched, setTouched] = useState(false);
+  const parking = useParking();
+  const photo = useRef<HTMLElement | null>(null);
+  // On a phone this scene is in the page but not shown; it should not perform for nobody.
+  const onShow = useIsDesktop();
+  const card = waiting[0];
+
+  // Out of cars: the same ones come round again. It is a taste, not the stock.
+  const next = () => setWaiting((cars) => (cars.length > 1 ? cars.slice(1) : examples.deck));
+
+  const like = useCallback(
+    (byHand: boolean) => {
+      parking.park(card.listing.id, photo.current, card.listing.photo.src);
+      setParked((cars) => (cars.length >= DEMO_BAYS ? [card] : [...cars, card]));
+      next();
+      onMatch?.(card);
+      if (!byHand) return;
+      haptic("match");
+      track("landing_demo_swiped", { listingId: card.listing.id, direction: "like" });
+    },
+    [parking, card, onMatch],
+  );
+
+  useEffect(() => {
+    if (phase !== "playing" || touched || !onShow) return;
+    const timer = window.setTimeout(() => like(false), PARK_ITSELF_AFTER_MS);
+    return () => window.clearTimeout(timer);
+    // Once, when the scene starts: later changes of car must not park another.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, touched, onShow]);
+
+  return (
+    <div onPointerDownCapture={() => setTouched(true)}>
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.div
+          key={card.listing.id}
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 0.92 }}
+          transition={springs.settle}
+        >
+          <GalleryCard
+            card={card}
+            car={EXAMPLE_CAR}
+            compact
+            heading="h4"
+            photoRef={(element) => {
+              photo.current = element;
+            }}
+            onPass={() => {
+              next();
+              haptic("commit");
+              track("landing_demo_swiped", { listingId: card.listing.id, direction: "pass" });
+            }}
+            onLike={() => like(true)}
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="mt-3 rounded-3xl bg-raised/80 p-2.5 ring-1 ring-line ring-inset">
+        <p className="flex items-center gap-2 px-1.5 pb-2 text-sm font-semibold">
+          <Warehouse className="size-4 text-accent-strong" aria-hidden />
+          {copy.nav.garage}
+        </p>
+        <Bays
+          parked={parked}
+          carModel={EXAMPLE_CAR.model}
+          arriving={parking.arriving}
+          bays={DEMO_BAYS}
+          columns={3}
+          labels={false}
+        />
+      </div>
+      <p className="mt-3 text-center text-sm text-fg-muted">{copy.landing.howTryDesktop}</p>
+      {parking.flights}
     </div>
   );
 }

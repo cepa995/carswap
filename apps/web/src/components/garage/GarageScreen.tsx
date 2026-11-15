@@ -9,6 +9,7 @@ import { browser } from "react-dom";
 import { MyCarSheet } from "@/components/car/MyCarSheet";
 import { DetailsSheet } from "@/components/deck/DetailsSheet";
 import { Button, buttonClass } from "@/components/ui/Button";
+import { ByScreen } from "@/components/ui/ByScreen";
 import { CarChip } from "@/components/ui/CarChip";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
@@ -67,7 +68,7 @@ export function GarageScreen() {
     <div className="relative isolate flex min-h-dvh flex-col" style={{ "--glow": "#f1c7b8" } as React.CSSProperties}>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 ambient" />
 
-      <div className="mx-auto flex w-full max-w-[30rem] flex-1 flex-col px-5 pb-10">
+      <div className="mx-auto flex w-full max-w-[30rem] flex-1 flex-col px-5 pb-10 lg:max-w-7xl lg:px-8">
         <header className="box-content flex h-14 shrink-0 items-center justify-between pt-safe">
           <Link
             href="/swipe"
@@ -90,66 +91,75 @@ export function GarageScreen() {
           ) : null}
         </header>
 
-        <div className="mt-4 flex items-end justify-between">
-          <h1 className="font-display text-5xl leading-none font-extrabold tracking-tight">{copy.garage.title}</h1>
-          {saved.length > 0 ? <p className="pb-1 text-sm text-fg-muted">{copy.garage.saved(saved.length)}</p> : null}
-        </div>
-
-        {saved.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
-            <span className="flex size-20 items-center justify-center rounded-[1.75rem] bg-surface text-accent-strong shadow-chip ring-1 ring-line">
-              <Warehouse className="size-10" aria-hidden />
-            </span>
-            <h2 className="mt-6 font-display text-3xl font-bold tracking-tight">{copy.garage.emptyTitle}</h2>
-            <p className="mt-2 max-w-xs text-[15px] text-pretty text-fg-muted">{copy.garage.emptyBody}</p>
-            <Link
-              href="/swipe"
-              transitionTypes={["nav-back"]}
-              className={buttonClass({ size: "lg", className: "mt-7" })}
-            >
-              {copy.garage.startSwiping}
-            </Link>
+        <main className="flex flex-1 flex-col">
+          <div className="mt-4 flex items-end justify-between lg:mt-6">
+            <h1 className="font-display text-5xl leading-none font-extrabold tracking-tight lg:text-6xl">
+              {copy.garage.title}
+            </h1>
+            {saved.length > 0 ? <p className="pb-1 text-sm text-fg-muted">{copy.garage.saved(saved.length)}</p> : null}
           </div>
-        ) : (
-          <>
-            <ul className="mt-6 flex flex-col gap-3">
-              <AnimatePresence initial={false} mode="popLayout">
-                {saved.map((card) => (
-                  <motion.li
-                    key={card.listing.id}
-                    layout
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -40, scale: 0.96 }}
-                    transition={springs.settle}
-                  >
-                    <GarageItem
-                      card={card}
-                      carModel={car?.model ?? null}
-                      onOpen={() => setDetailsId(card.listing.id)}
-                      onRemove={() => remove(card.listing.id)}
-                    />
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </ul>
 
-            <div className="mt-6 rounded-3xl bg-raised/70 p-5 ring-1 ring-line ring-inset">
-              <p className="text-xs font-semibold tracking-wider text-fg-faint uppercase">{copy.garage.nextTitle}</p>
-              <p className="mt-1.5 text-[15px] text-fg-muted">{copy.garage.nextBody}</p>
+          {saved.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+              <span className="flex size-20 items-center justify-center rounded-[1.75rem] bg-surface text-accent-strong shadow-chip ring-1 ring-line">
+                <Warehouse className="size-10" aria-hidden />
+              </span>
+              <h2 className="mt-6 font-display text-3xl font-bold tracking-tight">{copy.garage.emptyTitle}</h2>
+              <p className="mt-2 max-w-xs text-[15px] text-pretty text-fg-muted">{copy.garage.emptyBody}</p>
+              <Link
+                href="/swipe"
+                transitionTypes={["nav-back"]}
+                className={buttonClass({ size: "lg", className: "mt-7" })}
+              >
+                <ByScreen phone={copy.garage.startSwiping} desktop={copy.garage.startBrowsing} />
+              </Link>
             </div>
+          ) : (
+            <>
+              {/* One under another on a phone; side by side where there is room. */}
+              <ul className="mt-6 grid grid-cols-1 gap-3 lg:mt-8 lg:grid-cols-2 lg:gap-4 xl:grid-cols-3">
+                <AnimatePresence initial={false} mode="popLayout">
+                  {saved.map((card) => (
+                    <motion.li
+                      key={card.listing.id}
+                      layout
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -40, scale: 0.96 }}
+                      transition={springs.settle}
+                    >
+                      <GarageItem
+                        card={card}
+                        carModel={car?.model ?? null}
+                        onOpen={() => setDetailsId(card.listing.id)}
+                        onRemove={() => remove(card.listing.id)}
+                      />
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
 
-            <Link
-              href="/swipe"
-              transitionTypes={["nav-back"]}
-              className={buttonClass({ variant: "secondary", size: "lg", className: "mt-4" })}
-            >
-              {copy.garage.keepSwiping}
-            </Link>
-          </>
-        )}
+              <div className="mt-6 flex flex-col gap-4 lg:mt-8 lg:flex-row lg:items-center">
+                <div className="rounded-3xl bg-raised/70 p-5 ring-1 ring-line ring-inset lg:flex-1">
+                  <p className="text-xs font-semibold tracking-wider text-fg-faint uppercase">
+                    {copy.garage.nextTitle}
+                  </p>
+                  <p className="mt-1.5 text-[15px] text-fg-muted">{copy.garage.nextBody}</p>
+                </div>
 
-        {brand.isDemo ? <p className="mt-8 text-center text-xs text-fg-faint">{copy.common.demoNote}</p> : null}
+                <Link
+                  href="/swipe"
+                  transitionTypes={["nav-back"]}
+                  className={buttonClass({ variant: "secondary", size: "lg", className: "lg:shrink-0" })}
+                >
+                  <ByScreen phone={copy.garage.keepSwiping} desktop={copy.garage.keepBrowsing} />
+                </Link>
+              </div>
+            </>
+          )}
+
+          {brand.isDemo ? <p className="mt-8 text-center text-xs text-fg-faint">{copy.common.demoNote}</p> : null}
+        </main>
       </div>
 
       <DetailsSheet

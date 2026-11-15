@@ -39,7 +39,7 @@ interface MyCarSheetProps {
 /** "What do you drive?" in four taps and a drag, ending on the estimate. */
 export function MyCarSheet({ open, onOpenChange, onDone }: MyCarSheetProps) {
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={copy.wizard.title} height="tall">
+    <Sheet open={open} onOpenChange={onOpenChange} title={copy.wizard.title} height="tall" closeButton={false}>
       <Wizard
         onClose={() => onOpenChange(false)}
         onDone={() => {

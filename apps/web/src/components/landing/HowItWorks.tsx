@@ -1,56 +1,85 @@
 "use client";
 
-import { ArrowRight, KeyRound, Pause, Play, Warehouse } from "lucide-react";
-import { useInView, useReducedMotion } from "motion/react";
+import { ArrowRight, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState, type ReactNode } from "react";
-import { Wordmark } from "@/components/brand/Wordmark";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { buttonClass } from "@/components/ui/Button";
+import { ByScreen } from "@/components/ui/ByScreen";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import type { DeckCard } from "@/lib/domain/deck";
-import { useHydrated } from "@/lib/hydrated";
+import { useIsDesktop, useMediaQuery } from "@/lib/media";
 import { useEntrance, type Phase } from "./entrance";
-import { CarScene, DirectionScene, MatchScene, SwipeScene } from "./HowScenes";
+import { CarScene, DirectionScene, MatchScene, ParkScene, SwipeScene } from "./HowScenes";
 import { SectionHeading } from "./SectionHeading";
 
 const steps = copy.landing.steps;
 
+/** With the steps side by side, how long each waits for the one before it, so the row reads left to right. */
+const TURN_MS = 1300;
+
 /**
  * "Kako ide zamena": four steps, each shown with the piece of the app it is
- * about.
+ * about, at the size that piece really has.
  *
- * This is a phone app, so the phone layout is the real one. There the steps
- * simply follow each other down the page, and under each sits its piece of
- * the app at full size, straight on the page with nothing drawn around it:
- * the visitor's own phone is the frame. Each piece comes to life as it
- * scrolls into view, and the deck in step three can be swiped for real.
+ * On a phone the steps follow each other down the page, each piece straight
+ * on the page with nothing drawn around it, and each plays as it scrolls into
+ * view. On a big screen the same four stand side by side as a storyboard and
+ * play in turn, left to right.
  *
- * A desktop has no phone around the page, so there one is drawn, and the same
- * pieces take turns on its screen next to the list of steps.
+ * Two of the pieces are the real thing and can be used where they stand: the
+ * choice of direction, and step three. That one is the deck to swipe on a
+ * phone, and a card with a garage to park it in on a big screen, because that
+ * is what the app itself is on each.
  */
 export function HowItWorks() {
-  return (
-    <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <SectionHeading>{copy.landing.howTitle}</SectionHeading>
-      <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.howLead}</p>
+  const [matched, setMatched] = useState<DeckCard | null>(null);
+  const desktop = useIsDesktop();
+  const fourAbreast = useMediaQuery("(min-width: 80rem)");
+  // How many steps share a row, which is how many take turns.
+  const abreast = fourAbreast ? 4 : desktop ? 2 : 1;
 
-      <DownThePage />
-      <OnADrawnPhone />
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
+      <div className="lg:flex lg:items-end lg:justify-between lg:gap-10">
+        <div>
+          <SectionHeading>{copy.landing.howTitle}</SectionHeading>
+          <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.howLead}</p>
+        </div>
+        <Finish className="hidden lg:flex lg:items-center lg:gap-6" />
+      </div>
+
+      {/* A swiped card leaves sideways; clipping at the screen's edge keeps it from widening the page. */}
+      <div className="-mx-5 overflow-x-clip px-5 lg:mx-0 lg:overflow-x-visible lg:px-0">
+        <ol className="mt-10 grid grid-cols-1 gap-y-14 sm:gap-y-16 lg:mt-12 lg:grid-cols-2 lg:gap-x-12 lg:gap-y-14 xl:grid-cols-4 xl:grid-rows-[auto_1fr] xl:gap-x-7 xl:gap-y-0">
+          <Step index={0} abreast={abreast}>
+            {(phase) => <CarScene phase={phase} />}
+          </Step>
+          <Step index={1} abreast={abreast}>
+            {(phase) => <DirectionScene phase={phase} />}
+          </Step>
+          {/* Both are in the page and CSS shows one, so the right piece is there
+              from the first paint, before any script has run. */}
+          <Step index={2} abreast={abreast}>
+            {(phase) => (
+              <>
+                <div className="lg:hidden">
+                  <SwipeScene phase={phase} onMatch={setMatched} />
+                </div>
+                <div className="max-lg:hidden">
+                  <ParkScene phase={phase} onMatch={setMatched} />
+                </div>
+              </>
+            )}
+          </Step>
+          <Step index={3} abreast={abreast}>
+            {(phase) => <MatchScene phase={phase} card={matched ?? undefined} />}
+          </Step>
+        </ol>
+      </div>
+
+      <Finish className="mt-10 lg:hidden" />
     </section>
-  );
-}
-
-function StepNumber({ active = true, children }: { active?: boolean; children: ReactNode }) {
-  return (
-    <span
-      className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full font-display text-base font-bold tabular-nums ring-1 transition duration-300 ease-out-expo ring-inset",
-        active ? "bg-accent text-on-accent ring-accent" : "bg-surface text-fg ring-line-strong",
-      )}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -67,222 +96,76 @@ function Finish({ className }: { className?: string }) {
       <Link
         href="/swipe"
         transitionTypes={["nav-forward"]}
-        className={buttonClass({ size: "lg", className: "mt-5 w-full sm:w-auto" })}
+        className={buttonClass({ size: "lg", className: "mt-5 w-full sm:w-auto lg:mt-0" })}
       >
-        {copy.landing.cta}
+        <ByScreen phone={copy.landing.cta} desktop={copy.landing.ctaDesktop} />
         <ArrowRight className="size-5" aria-hidden />
       </Link>
     </div>
   );
 }
 
-// ── On a phone: one step after another, down the page ────────────────────
+/** Holds a piece at its first frame a little longer, so pieces that come into view together play in turn. */
+function useTurn(phase: Phase, waitMs: number): Phase {
+  const [up, setUp] = useState(false);
+  const due = phase === "playing" && waitMs > 0;
 
-function DownThePage() {
-  const [matched, setMatched] = useState<DeckCard | null>(null);
+  useEffect(() => {
+    if (!due) return;
+    const timer = window.setTimeout(() => setUp(true), waitMs);
+    return () => window.clearTimeout(timer);
+  }, [due, waitMs]);
 
-  return (
-    // A swiped card leaves sideways; clipping at the screen's edge keeps it from widening the page.
-    <div className="-mx-5 overflow-x-clip px-5 lg:hidden">
-      <ol className="mt-10">
-        <Step index={0}>{(phase) => <CarScene phase={phase} />}</Step>
-        <Step index={1}>{(phase) => <DirectionScene phase={phase} />}</Step>
-        <Step index={2}>{(phase) => <SwipeScene phase={phase} onMatch={setMatched} />}</Step>
-        <Step index={3}>{(phase) => <MatchScene phase={phase} card={matched ?? undefined} />}</Step>
-      </ol>
-      <Finish className="mt-10" />
-    </div>
-  );
+  return due && !up ? "armed" : phase;
 }
 
-function Step({ index, children }: { index: number; children: (phase: Phase) => ReactNode }) {
+interface StepProps {
+  index: number;
+  /** How many steps stand in one row at this width. */
+  abreast: number;
+  children: (phase: Phase) => ReactNode;
+}
+
+function Step({ index, abreast, children }: StepProps) {
   const scene = useRef<HTMLDivElement>(null);
-  // A scene performs once, when enough of it is on screen to be watched.
-  const phase = useEntrance(scene, 0.4);
+  // A scene performs once, when enough of it is on screen to be watched, and
+  // after the ones to its left have had their start.
+  const phase = useTurn(useEntrance(scene, 0.4), (index % abreast) * TURN_MS);
   const step = steps[index];
+  const last = index === steps.length - 1;
 
   return (
-    <li className="mt-14 first:mt-0 sm:mt-16 sm:grid sm:grid-cols-[minmax(0,1fr)_22rem] sm:items-center sm:gap-x-10">
+    <li
+      className={cn(
+        "relative sm:grid sm:grid-cols-[minmax(0,1fr)_22rem] sm:items-center sm:gap-x-10 lg:block",
+        // Four abreast, the text and the piece of every step share two rows,
+        // so the pieces start on one line however long the text above them is.
+        "xl:row-span-2 xl:grid xl:grid-cols-1 xl:grid-rows-subgrid xl:items-start xl:gap-x-0 xl:gap-y-6",
+      )}
+    >
       <div>
         <div className="flex items-center gap-3">
-          <StepNumber>{index + 1}</StepNumber>
-          <h3 className="font-display text-[1.75rem] leading-none font-bold tracking-tight">{step.title}</h3>
+          <span className="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full bg-accent font-display text-base font-bold text-on-accent tabular-nums ring-4 ring-canvas">
+            {index + 1}
+          </span>
+          {/* Four abreast, a line runs from each number to the next, like a route. */}
+          {last ? null : (
+            <span
+              aria-hidden
+              className="absolute top-[1.125rem] right-[-1.75rem] left-9 hidden h-0.5 -translate-y-1/2 bg-line-strong xl:block"
+            />
+          )}
         </div>
-        <p className="mt-3 leading-relaxed text-pretty text-fg-muted">{step.body}</p>
+        <h3 className="mt-3 font-display text-[1.75rem] leading-none font-bold tracking-tight xl:mt-4 xl:text-2xl xl:leading-tight">
+          {"desktop" in step ? <ByScreen phone={step.title} desktop={step.desktop.title} /> : step.title}
+        </h3>
+        <p className="mt-3 leading-relaxed text-pretty text-fg-muted xl:mt-2 xl:text-[15px]">
+          {"desktop" in step ? <ByScreen phone={step.body} desktop={step.desktop.body} /> : step.body}
+        </p>
       </div>
-      <div ref={scene} className="mt-5 sm:mt-0">
+      <div ref={scene} className="mt-5 sm:mt-0 lg:mt-6 lg:max-w-[24rem] xl:mt-0 xl:max-w-none">
         {children(phase)}
       </div>
     </li>
-  );
-}
-
-// ── On a desktop: the same pieces, on the screen of a drawn phone ────────
-
-/** How long each step holds the phone's screen before the next takes over. */
-const HOLD_MS = [5200, 5800, 7000, 6000];
-/** After a like, a beat to see the card go before the screen turns to the match. */
-const MATCH_AFTER_MS = 650;
-
-function OnADrawnPhone() {
-  const reduceMotion = useReducedMotion() ?? false;
-  const hydrated = useHydrated();
-  const phone = useRef<HTMLDivElement>(null);
-  const onScreen = useInView(phone, { amount: 0.4 });
-  const entrance = useEntrance(phone, 0.4);
-
-  const [active, setActive] = useState(0);
-  /** Goes up each time a step takes the screen, so its timer starts from nothing. */
-  const [take, setTake] = useState(0);
-  const [autoplay, setAutoplay] = useState(true);
-  const [matched, setMatched] = useState<DeckCard | null>(null);
-
-  // Only the step that has the screen performs. The others wait at their first
-  // frame, out of sight, so each starts from the beginning when its turn comes.
-  const phaseAt = (index: number): Phase => {
-    if (reduceMotion || !hydrated) return "static";
-    if (index !== active) return "armed";
-    // Until the tour has moved on, the first step follows the phone itself:
-    // waiting while the phone is below the screen, left as drawn if it was on
-    // screen from the start.
-    return take === 0 ? entrance : "playing";
-  };
-
-  function show(index: number) {
-    setActive(index);
-    setTake((count) => count + 1);
-  }
-
-  function pick(index: number) {
-    show(index);
-    setAutoplay(false);
-  }
-
-  function toggleAutoplay() {
-    if (!autoplay) setTake((count) => count + 1);
-    setAutoplay(!autoplay);
-  }
-
-  function handleMatch(card: DeckCard) {
-    setMatched(card);
-    // As in the app: a like on a swap turns the whole screen to the match.
-    window.setTimeout(() => pick(3), MATCH_AFTER_MS);
-  }
-
-  const scenes: ReadonlyArray<{ fullScreen?: boolean; scene: ReactNode }> = [
-    { scene: <CarScene phase={phaseAt(0)} /> },
-    { scene: <DirectionScene phase={phaseAt(1)} /> },
-    { scene: <SwipeScene phase={phaseAt(2)} onMatch={handleMatch} fill /> },
-    { fullScreen: true, scene: <MatchScene phase={phaseAt(3)} card={matched ?? undefined} fill /> },
-  ];
-
-  return (
-    <div className="mt-10 hidden lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-center lg:gap-x-14">
-      <div>
-        <ol className="flex flex-col gap-1.5">
-          {steps.map((step, index) => {
-            const current = index === active;
-            return (
-              <li key={step.title} aria-current={current ? "step" : undefined}>
-                <button
-                  type="button"
-                  onClick={() => pick(index)}
-                  className={cn(
-                    "group relative flex w-full items-start gap-4 overflow-hidden rounded-3xl p-4 pr-5 text-left ring-1 transition duration-300 ease-out-expo",
-                    current ? "bg-surface shadow-float ring-line" : "ring-transparent hover:bg-surface/60",
-                  )}
-                >
-                  <StepNumber active={current}>{index + 1}</StepNumber>
-                  <span className="min-w-0 pt-0.5">
-                    <span className="block font-display text-2xl leading-tight font-bold tracking-tight">
-                      {step.title}
-                    </span>
-                    <span className="mt-1 block text-[15px] leading-relaxed text-pretty text-fg-muted">
-                      {step.body}
-                    </span>
-                  </span>
-                  {/* The step's timer. Its end is what hands the screen to the next step.
-                      Hidden for a visitor who asked for less motion, and an element that
-                      is not drawn runs no animation, so for them nothing moves on by itself.
-                      Done in CSS because the server cannot know the preference. */}
-                  {current && autoplay ? (
-                    <span
-                      key={take}
-                      aria-hidden
-                      className="how-fill absolute inset-x-0 bottom-0 h-1 bg-accent motion-reduce:hidden"
-                      style={{
-                        animationDuration: `${HOLD_MS[index]}ms`,
-                        animationPlayState: onScreen ? "running" : "paused",
-                      }}
-                      onAnimationEnd={() => show((index + 1) % steps.length)}
-                    />
-                  ) : null}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-        <Finish className="mt-6 pl-4" />
-      </div>
-
-      <div>
-        {/* Touching anything on the phone means the visitor has taken over; the tour stops and waits. */}
-        <div
-          ref={phone}
-          role="group"
-          aria-label={copy.landing.howPhone}
-          onPointerDownCapture={() => setAutoplay(false)}
-          className="relative mx-auto w-[23rem] rounded-[3.25rem] bg-fg p-2.5 shadow-card"
-        >
-          <span
-            aria-hidden
-            className="absolute top-[1.375rem] left-1/2 z-20 -ml-11 h-6 w-[5.5rem] rounded-full bg-fg"
-          />
-          <div
-            data-compact
-            className="relative isolate h-[min(43rem,calc(100vh-7rem))] min-h-[33rem] overflow-hidden rounded-[2.7rem] bg-canvas"
-          >
-            <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 ambient" />
-            <div aria-hidden className="flex h-[4.75rem] items-end justify-between px-5 pb-2.5">
-              <Wordmark className="text-lg" />
-              <span className="flex h-8 items-center gap-1.5 rounded-full bg-surface px-3 text-xs font-semibold shadow-chip ring-1 ring-line">
-                <Warehouse className="size-3.5" />
-                {copy.nav.garage}
-              </span>
-            </div>
-
-            {scenes.map(({ fullScreen, scene }, index) => (
-              <div
-                key={steps[index].title}
-                inert={index !== active}
-                className={cn(
-                  "absolute inset-x-0 bottom-0 transition-opacity duration-300",
-                  fullScreen ? "top-0 z-10" : "top-[4.75rem] flex flex-col justify-center px-4 pb-8",
-                  index === active ? "opacity-100" : "pointer-events-none opacity-0",
-                )}
-              >
-                {scene}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Nothing plays by itself with reduced motion, so there is nothing to pause. */}
-        <div className="mt-4 flex justify-center motion-reduce:hidden">
-          <button
-            type="button"
-            onClick={toggleAutoplay}
-            className="flex h-9 items-center gap-2 rounded-full px-3.5 text-sm font-semibold text-fg-muted transition duration-150 ease-out-expo hover:bg-raised hover:text-fg active:scale-95"
-          >
-            {autoplay ? (
-              <Pause className="size-3.5 fill-current" strokeWidth={0} aria-hidden />
-            ) : (
-              <Play className="size-3.5 fill-current" strokeWidth={0} aria-hidden />
-            )}
-            {autoplay ? copy.landing.howPause : copy.landing.howPlay}
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }

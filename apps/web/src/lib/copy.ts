@@ -111,6 +111,18 @@ export const copy = {
     openGarage: "Otvori garažu",
   },
 
+  // On a big screen cars are not swiped one at a time. They hang in a gallery,
+  // and one that is liked is parked in the garage beside it.
+  gallery: {
+    titleCar: "Može zamena",
+    titleNoCar: "Svi automobili",
+    details: "Detalji",
+    garageEmpty: "Klikni Menjam i auto se parkira ovde.",
+    garageSome: "Tvoji parkirani automobili.",
+    bay: "P",
+    loading: "Otvaramo garažu…",
+  },
+
   details: {
     swapTitle: "Zamena",
     listingPrice: "Cena automobila",
@@ -225,9 +237,12 @@ export const copy = {
     title: "Garaža",
     saved: (count: number) => `U garaži: ${count}`,
     emptyTitle: "Garaža zvrji prazna",
-    emptyBody: "Auto koji prevučeš desno čeka te ovde, sa doplatom i auto-kućom.",
+    emptyBody: "Auto koji ti se svidi čeka te ovde, sa doplatom i auto-kućom.",
     startSwiping: "Kreni da prevlačiš",
     keepSwiping: "Nastavi da prevlačiš",
+    // The same two, for a big screen, where there is a gallery to look through and nothing to swipe.
+    startBrowsing: "Pogledaj automobile",
+    keepBrowsing: "Nazad na automobile",
     remove: "Izbaci iz garaže",
     nextTitle: "Šta dalje?",
     nextBody: "Uskoro odavde tražiš obavezujuću ponudu auto-kuće jednim dodirom.",
@@ -237,7 +252,12 @@ export const copy = {
     eyebrow: (city: string) => `Zamena automobila · ${city}`,
     title: "Šta tvoj auto može da postane?",
     lead: "Reci šta voziš. Doplati za bolji ili uzmi jeftiniji pa ponesi keš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
+    // Where two wordings are given, the second is for a big screen: there cars
+    // are parked from a gallery, not swiped.
+    leadDesktop:
+      "Reci šta voziš. Doplati za bolji ili uzmi jeftiniji pa ponesi keš. Parkiraj u garažu šta ti se sviđa i odmah vidiš gde može zamena.",
     cta: "Kreni da prevlačiš",
+    ctaDesktop: "Pogledaj automobile",
     ctaCar: "Unesi svoj auto",
     equationCar: "Tvoj auto",
     equationExample: "primer",
@@ -260,6 +280,10 @@ export const copy = {
       {
         title: "Prevlači",
         body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko sve izađe: doplata, porez, papiri i registracija.",
+        desktop: {
+          title: "Parkiraj šta ti se sviđa",
+          body: "Menjam parkira auto u tvoju garažu, Dalje ga sklanja. Na svakoj kartici piše koliko sve izađe: doplata, porez, papiri i registracija.",
+        },
       },
       {
         title: "Može zamena",
@@ -269,9 +293,7 @@ export const copy = {
     howEnd: "Ključevi su tvoji.",
     // Under the cards in step three, which are real and can be swiped.
     howTry: "Probaj ovde: prevuci karticu ili dodirni dugme.",
-    howPause: "Pauziraj",
-    howPlay: "Pusti",
-    howPhone: "Primer na telefonu",
+    howTryDesktop: "Probaj ovde: klikni Menjam.",
     closingSteps: ["Pregled", "Ugovor", "Notar"],
     // What changing a car through a classified ad is like, and what replaces it here.
     versusTitle: "Zašto ne oglas?",
@@ -308,6 +330,7 @@ export const copy = {
     versusClaims: ["„Nije udaran“", "„Garažiran“", "„Prvi vlasnik“", "„Kao nov“"],
     versusChecks: ["Istorija vozila", "Zaloga", "Lizing"],
     faqTitle: "Česta pitanja",
+    faqLead: "Kratko i jasno, bez sitnih slova.",
     faq: [
       {
         key: "estimate",

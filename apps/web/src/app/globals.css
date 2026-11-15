@@ -327,25 +327,6 @@
   }
 }
 
-/* ── "Kako ide zamena" ─────────────────────────────────────────────────────
-   On a desktop the steps take turns on a drawn phone. The bar under the step
-   that has the screen fills while it plays, and its end is what hands over to
-   the next. A CSS animation, so it can be paused in place. */
-
-.how-fill {
-  transform-origin: left;
-  animation: how-fill linear both;
-}
-
-@keyframes how-fill {
-  from {
-    scale: 0 1;
-  }
-  to {
-    scale: 1 1;
-  }
-}
-
 /* ── Questions ─────────────────────────────────────────────────────────────
    An answer slides open where the browser can animate to a height it has to
    measure. Elsewhere it simply opens, which is what <details> has always done. */

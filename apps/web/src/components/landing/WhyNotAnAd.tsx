@@ -31,8 +31,10 @@ import { SectionHeading } from "./SectionHeading";
  * itself: the deal as a card shows it, the costs as the details sheet lists
  * them, with the numbers of a real example.
  *
- * Laid out for a phone: one pair under another, as wide as the screen. With
- * room, they sit two abreast. Each plays once as it scrolls into view.
+ * Laid out for a phone: one pair under another, as wide as the screen, with
+ * ours lying on the ad's. On a big screen each pair is a tile, two abreast
+ * and as wide as the page, with the two cards side by side inside it, so the
+ * width is used and not left empty. Each plays once as it scrolls into view.
  */
 export function WhyNotAnAd() {
   // The car the walkthrough above deals first, so the two sections tell one story.
@@ -41,12 +43,12 @@ export function WhyNotAnAd() {
   const { price, costs, time, trust } = copy.landing.versus;
 
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
+    <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
       <SectionHeading>{copy.landing.versusTitle}</SectionHeading>
       <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.versusLead}</p>
 
       {/* One column that cannot grow past the screen, whatever is inside it. */}
-      <ul className="mt-10 grid grid-cols-1 gap-y-14 md:grid-cols-2 md:gap-x-12 lg:gap-x-24 lg:gap-y-20">
+      <ul className="mt-10 grid grid-cols-1 gap-y-14 md:grid-cols-2 md:gap-x-12 lg:mt-12 lg:gap-6">
         <Contrast item={price} theirs={<Haggling />}>
           <DealSummary card={card} car={EXAMPLE_CAR} />
         </Contrast>
@@ -136,28 +138,31 @@ function Contrast({ item, theirs, children }: ContrastProps) {
   const phase = useEntrance(pair);
 
   return (
-    <li className="mx-auto w-full max-w-[26rem] min-w-0 md:mx-0">
+    <li className="mx-auto w-full max-w-[26rem] min-w-0 md:mx-0 lg:max-w-none lg:rounded-card lg:bg-surface lg:p-8 lg:shadow-float lg:ring-1 lg:ring-line">
       <p className="flex items-center gap-2 text-[15px] text-fg-muted">
         <Mark ours={false} />
         <span className="sr-only">{copy.landing.versusAd}: </span>
         <s className="decoration-fg-faint/70">{item.instead}</s>
       </p>
-      <h3 className="mt-2.5 font-display text-[1.75rem] leading-none font-bold tracking-tight">{item.title}</h3>
-      <p className="mt-3 leading-relaxed text-pretty text-fg-muted">{item.body}</p>
+      <h3 className="mt-2.5 font-display text-[1.75rem] leading-none font-bold tracking-tight lg:text-[2rem]">
+        {item.title}
+      </h3>
+      <p className="mt-3 leading-relaxed text-pretty text-fg-muted lg:max-w-md">{item.body}</p>
 
       {/* A picture of what the lines above say, so it is not read out a second time. */}
-      <motion.div ref={pair} aria-hidden className="mt-6" {...stage(phase)}>
+      <motion.div ref={pair} aria-hidden className="mt-6 lg:mt-8 lg:flex lg:items-center" {...stage(phase)}>
         <motion.div
           data-side="theirs"
           variants={theirCard}
-          // The room at the bottom is what our card covers, so nothing written is hidden under it.
-          className="relative mr-7 rounded-[1.75rem] bg-raised p-4 pb-14 ring-1 ring-line"
+          // The room at the bottom is what our card covers on a phone, so nothing
+          // written is hidden under it. Side by side, ours covers a strip on the right.
+          className="relative mr-7 rounded-[1.75rem] bg-raised p-4 pb-14 ring-1 ring-line lg:mr-0 lg:w-[54%] lg:shrink-0 lg:pr-12 lg:pb-5"
         >
           <p className={cn(label, "text-fg-faint")}>{copy.landing.versusAd}</p>
           <div className="mt-3.5">{theirs}</div>
           <motion.span
             variants={stamp}
-            className="absolute top-3 right-3 rounded-lg border-[3px] border-fg bg-chip px-2 py-0.5 font-display text-lg leading-none font-extrabold text-fg shadow-float"
+            className="absolute top-3 right-3 rounded-lg border-[3px] border-fg bg-chip px-2 py-0.5 font-display text-lg leading-none font-extrabold text-fg shadow-float lg:right-12"
           >
             {copy.deck.stampPass}
           </motion.span>
@@ -166,7 +171,7 @@ function Contrast({ item, theirs, children }: ContrastProps) {
         <motion.div
           data-side="ours"
           variants={ourCard}
-          className="relative -mt-10 ml-7 rounded-[1.75rem] bg-surface p-4 shadow-card ring-1 ring-line"
+          className="relative -mt-10 ml-7 rounded-[1.75rem] bg-surface p-4 shadow-card ring-1 ring-line lg:mt-0 lg:-ml-9 lg:min-w-0 lg:flex-1"
         >
           <p className={cn(label, "text-accent-strong")}>
             <Mark ours />

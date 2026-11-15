@@ -41,7 +41,7 @@ export function ListingScreen({ listing, dealer, swap }: ListingScreenProps) {
     <div className="relative isolate min-h-dvh">
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 ambient" />
 
-      <div className="mx-auto w-full max-w-[30rem] px-5 pb-12">
+      <div className="mx-auto w-full max-w-[30rem] px-5 pb-12 lg:max-w-6xl lg:px-8">
         <header className="box-content flex h-14 items-center justify-between pt-safe">
           <Link href="/" aria-label={brand.name} className="flex items-center gap-2.5">
             <Wordmark />
@@ -53,85 +53,92 @@ export function ListingScreen({ listing, dealer, swap }: ListingScreenProps) {
           </Link>
         </header>
 
-        <main>
-          <div
-            className="relative mt-2 overflow-hidden rounded-card bg-raised shadow-card ring-1 ring-line"
-            style={{ aspectRatio: displayAspect(listing.photo) }}
-          >
-            <Image
-              src={listing.photo.src}
-              alt={`${name}, ${listing.color}`}
-              fill
-              sizes="(max-width: 30rem) 100vw, 28rem"
-              loading="eager"
-              fetchPriority="high"
-              className="object-cover"
-            />
-            <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-chip-ink shadow-chip ring-1 ring-black/[0.06]">
-              <span aria-hidden className="size-1.5 rounded-full bg-accent" />
-              {copy.deal.canSwap}
-            </span>
-          </div>
-
-          <div className="mt-5 flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <h1 className="font-display text-[2rem] leading-none font-bold tracking-tight text-balance">{name}</h1>
-              <p className="mt-1.5 text-sm text-fg-muted">{listing.variant}</p>
-            </div>
-            <div className="shrink-0 text-right">
-              <p className="text-[11px] font-medium tracking-wider text-fg-faint uppercase">{copy.deal.price}</p>
-              <p className="font-display text-xl font-bold tabular-nums">{formatEur(listing.priceEur)}</p>
+        {/* One column on a phone. With room, the photo stays put on the left while the facts scroll beside it. */}
+        <main className="lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-start lg:gap-x-12 lg:pt-4">
+          <div className="lg:sticky lg:top-6">
+            <div
+              className="relative mt-2 overflow-hidden rounded-card bg-raised shadow-card ring-1 ring-line lg:mt-0"
+              style={{ aspectRatio: displayAspect(listing.photo) }}
+            >
+              <Image
+                src={listing.photo.src}
+                alt={`${name}, ${listing.color}`}
+                fill
+                sizes="(min-width: 64rem) 40rem, (max-width: 30rem) 100vw, 28rem"
+                loading="eager"
+                fetchPriority="high"
+                className="object-cover"
+              />
+              <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-chip-ink shadow-chip ring-1 ring-black/[0.06]">
+                <span aria-hidden className="size-1.5 rounded-full bg-accent" />
+                {copy.deal.canSwap}
+              </span>
             </div>
           </div>
 
-          <ul className="mt-3 flex flex-wrap gap-1.5">
-            {specs.map((spec) => (
-              <li
-                key={spec}
-                className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium tabular-nums ring-1 ring-line"
-              >
-                {spec}
-              </li>
-            ))}
-          </ul>
+          <div>
+            <div className="mt-5 flex items-start justify-between gap-4 lg:mt-0">
+              <div className="min-w-0">
+                <h1 className="font-display text-[2rem] leading-none font-bold tracking-tight text-balance lg:text-[2.75rem]">
+                  {name}
+                </h1>
+                <p className="mt-1.5 text-sm text-fg-muted">{listing.variant}</p>
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[11px] font-medium tracking-wider text-fg-faint uppercase">{copy.deal.price}</p>
+                <p className="font-display text-xl font-bold tabular-nums">{formatEur(listing.priceEur)}</p>
+              </div>
+            </div>
 
-          {swap ? <SentSwap swap={swap} /> : null}
-
-          <Link
-            href={deckPath(listing.id)}
-            transitionTypes={["nav-forward"]}
-            className={buttonClass({ size: "lg", className: "mt-5 w-full" })}
-          >
-            {copy.listing.cta}
-            <ArrowRight className="size-5" aria-hidden />
-          </Link>
-          {swap ? <p className="mt-2.5 text-center text-sm text-fg-muted">{copy.listing.yours}</p> : null}
-
-          <Section title={copy.costs.titleNoSwap}>
-            <CostBreakdown costs={costs} chargesVat={dealer.chargesVat} />
-          </Section>
-
-          <Section title={copy.details.highlightsTitle}>
-            <ul className="flex flex-wrap gap-2">
-              {listing.highlights.map((highlight) => (
-                <li key={highlight} className="rounded-full bg-surface px-3.5 py-2 text-sm ring-1 ring-line">
-                  {highlight}
+            <ul className="mt-3 flex flex-wrap gap-1.5">
+              {specs.map((spec) => (
+                <li
+                  key={spec}
+                  className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium tabular-nums ring-1 ring-line"
+                >
+                  {spec}
                 </li>
               ))}
             </ul>
-          </Section>
 
-          <Section title={copy.details.dealerTitle}>
-            <div className="rounded-2xl bg-raised p-4">
-              <p className="font-semibold">{dealer.name}</p>
-              <p className="text-sm text-fg-muted">
-                {dealer.area}, {dealer.city}
-              </p>
-              <p className="mt-2 text-[13px] leading-relaxed text-fg-faint">
-                {copy.details.dealerTakes(dealer.rules.maxAgeYears, formatKm(dealer.rules.maxKm))}
-              </p>
-            </div>
-          </Section>
+            {swap ? <SentSwap swap={swap} /> : null}
+
+            <Link
+              href={deckPath(listing.id)}
+              transitionTypes={["nav-forward"]}
+              className={buttonClass({ size: "lg", className: "mt-5 w-full" })}
+            >
+              {copy.listing.cta}
+              <ArrowRight className="size-5" aria-hidden />
+            </Link>
+            {swap ? <p className="mt-2.5 text-center text-sm text-fg-muted">{copy.listing.yours}</p> : null}
+
+            <Section title={copy.costs.titleNoSwap}>
+              <CostBreakdown costs={costs} chargesVat={dealer.chargesVat} />
+            </Section>
+
+            <Section title={copy.details.highlightsTitle}>
+              <ul className="flex flex-wrap gap-2">
+                {listing.highlights.map((highlight) => (
+                  <li key={highlight} className="rounded-full bg-surface px-3.5 py-2 text-sm ring-1 ring-line">
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+
+            <Section title={copy.details.dealerTitle}>
+              <div className="rounded-2xl bg-raised p-4">
+                <p className="font-semibold">{dealer.name}</p>
+                <p className="text-sm text-fg-muted">
+                  {dealer.area}, {dealer.city}
+                </p>
+                <p className="mt-2 text-[13px] leading-relaxed text-fg-faint">
+                  {copy.details.dealerTakes(dealer.rules.maxAgeYears, formatKm(dealer.rules.maxKm))}
+                </p>
+              </div>
+            </Section>
+          </div>
         </main>
 
         <footer className="mt-6 text-xs text-fg-faint">

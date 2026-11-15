@@ -31,20 +31,26 @@ CI runs the format check, lint, typecheck, unit tests, a production build and th
 
 ## What the web app does today
 
-| Route                     | What is there                                                                                                              |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `/`                       | Landing page: the "my car + X" equation with a live slider, and a walkthrough of the four steps that can be tried in place |
-| `/swipe`                  | The deck: drag or use the keyboard to like or pass, undo, open details                                                     |
-| `/garage`                 | Cars you liked, each with its top-up, smallest first                                                                       |
-| `/auto/[id]`              | One car at an address worth sending to someone                                                                             |
-| `/auto/[id]/[car]/[deal]` | The same car with the sender's swap, e.g. `/auto/skoda-octavia-3/golf/doplata-2400`                                        |
-| `/credits`                | Author, licence and source for every demo photo                                                                            |
+| Route                     | What is there                                                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                       | Landing page: the "my car + X" equation with a live slider, and a walkthrough of the four steps that can be tried in place                                |
+| `/swipe`                  | The cars on offer. On a phone, a deck: drag or use the keyboard to like or pass, undo, open details. On a big screen, a gallery with the garage beside it |
+| `/garage`                 | Cars you liked, each with its top-up, smallest first. A list on a phone, a grid on a big screen                                                           |
+| `/auto/[id]`              | One car at an address worth sending to someone                                                                                                            |
+| `/auto/[id]/[car]/[deal]` | The same car with the sender's swap, e.g. `/auto/skoda-octavia-3/golf/doplata-2400`                                                                       |
+| `/credits`                | Author, licence and source for every demo photo                                                                                                           |
 
 There is no backend yet. The app runs on seed data, and what a visitor enters (their car, which way they want to trade, how much money is in play, and their swipes) is kept in `localStorage`.
 
 The flow: a visitor can swipe straight away. After the first like the app asks what they drive (make, model, year, mileage, fuel) and shows an estimated value as a range. Then they say which way they are trading: a pricier car and they add money, a cheaper one and they take cash, or either. From then on every card shows the top-up or the cash back instead of just the price, the deck is limited to the swaps they asked for, and a like on a car whose dealer accepts the visitor's car is a match.
 
 Every card also shows two figures a classified ad leaves out: what changes hands on the day with tax and paperwork included, and what the car costs to register for a year. The details sheet breaks both down.
+
+**Phone first, and a different shape on a big screen.** From 1024px wide (`lg`) the app stops being a column the width of a phone:
+
+- `/swipe` becomes a gallery. Cars hang side by side, the choice of direction and the slider sit in a toolbar that stays put, and the garage stands beside the gallery. "Menjam" parks the car: its picture flies over and backs into a bay. "Dalje" takes it off the wall, and Z undoes either.
+- Sheets become dialogs in the middle of the screen, and a car's details get two columns.
+- The landing page's four steps stand side by side and play in turn, and step three is a card with a little garage instead of a deck to swipe.
 
 Any car can be sent to someone, with Viber first. With a car entered, the link carries the sender's equation, so the preview in the chat reads "Golf + 2.400 € = Škoda Octavia" before anyone opens it. Opening it shows that car and the sender's swap, and one tap deals the same car first in the recipient's own deck.
 
@@ -54,11 +60,12 @@ Any car can be sent to someone, with Viber first. With a car entered, the link c
 apps/web/
   src/app/               routes, global styles and design tokens (globals.css)
   src/components/
-    deck/                swipe engine (SwipeDeck), card face, details, match moment
+    deck/                the deck in both shapes (DeckPhone, DeckGallery) over one session
+                         (useDeckSession), swipe engine, card faces, details, match moment
     car/                 "my car" flow, the trade-up / trade-down control, cost breakdown
     share/               share sheet and the button that opens it
     listing/             the page a shared link opens
-    garage/              saved swaps
+    garage/              saved swaps, the garage panel with its bays, and the parking flight
     landing/             landing page sections, and the "how a swap goes" walkthrough with its scenes
     ui/                  shared primitives: button, sheet, slider, car chip, animated number
   src/lib/
@@ -67,6 +74,7 @@ apps/web/
     seed/                demo dealers, listings and vehicle catalogue
     share.ts             the shared-link format: writing it, and reading it back strictly
     copy.ts              every user-facing string (Serbian)
+    media.ts             screen-size detection (`useIsDesktop`) for the places CSS cannot decide
     store.ts             local state, persisted to localStorage
     useEstimate.ts       the one place screens get a car's estimated value
     analytics.ts         typed funnel events; no provider wired up yet
@@ -86,6 +94,8 @@ scripts/seed-photos/     builds the demo photo set from Wikimedia Commons
 - **Preview images are JPEG on purpose.** `next/og` writes PNG only, about 500 kB for an image with a photo in it, which some messengers will not fetch. `lib/og/share-image.tsx` re-encodes with `sharp` to about 100 kB and keeps the result with `use cache`. Set `NEXT_PUBLIC_SITE_URL` in production, or the preview tags point at localhost.
 - **`short:` is a Tailwind variant for low viewports.** A phone browser with its address bar showing leaves about 650px of height. The deck tightens itself there so the photo keeps its share of the card. The same styles apply inside anything marked `data-compact`.
 - **This is a phone app, and the landing page is laid out for a phone first.** "Kako ide zamena" (`components/landing/HowItWorks.tsx`) shows each step with a real piece of the app at the size it has on a phone. On a phone those pieces sit straight on the page, one step after another, and play as they scroll into view; nothing is drawn around them and nothing is pinned. On a desktop there is no phone around the page, so one is drawn and the same pieces take turns on its screen. Check any change to it at a phone-sized viewport (about 390 by 660) before a desktop one.
+- **Two shapes, one session.** `DeckScreen` picks `DeckPhone` or `DeckGallery` by width, and both read `useDeckSession`, which holds everything the visitor has done. Add behaviour there, not in a shell, or it will exist on one kind of screen only. Where the server has to render something that differs by screen (the landing page), both versions are in the page and CSS shows one (`ByScreen` for words): the server cannot know the width, and a script that swaps them after load would shift the page.
+- **Parking is two halves that only share an id.** Whoever shows cars calls `park()` from `useParking` with the photo's element in the same handler that adds the car to the garage. Whoever draws the garage marks each bay's picture frame with `data-bay={id}` and hides the picture while the id is in `arriving`. The flight finds the bay by that mark.
 - **The other landing sections follow the same rule.** "Zašto ne oglas?" (`components/landing/WhyNotAnAd.tsx`) puts each thing an ad makes tiresome next to what replaces it, and where the app already has that thing it is rendered from the app's own components (`DealSummary` from the card, `CostBreakdown` from the details) with a real example's figures. Answers in "Česta pitanja" do the same.
 - **Pieces of the landing page play once, when they scroll into view.** `components/landing/entrance.ts` gives each one of three phases: `static` (finished, and all the server or a reduced-motion visitor ever sees), `armed` (waiting at its first frame, off screen) and `playing`. Without the middle one a piece is seen finished, vanishes, and then plays. A piece that is already on screen when the page loads stays `static`, so a reload half-way down the page does not replay it.
 - **Check widths against `clientWidth`.** A phone browser answers content that is too wide by widening what it reports as `window.innerWidth`, so `scrollWidth - innerWidth` reads zero on a page that is visibly cut off. An end-to-end test walks the landing page at 320px wide. A grid without explicit columns is the usual cause: its track grows to fit one long row.
