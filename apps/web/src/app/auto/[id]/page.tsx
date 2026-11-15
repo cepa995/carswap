@@ -17,6 +17,11 @@ export function generateStaticParams() {
  *
  * Left to its default, Next.js would send a shell first and stream the title
  * in afterwards, except to the crawlers on its own list. Viber is not on it.
+ *
+ * The other switch for this is `htmlLimitedBots` in next.config, set to match
+ * every user agent, which turns streaming off for all pages. With it, route
+ * prefetches across the app never finished (seen on Next.js 16.4.6), so it
+ * is not used.
  */
 export const ensureStatic = "navigation";
 
