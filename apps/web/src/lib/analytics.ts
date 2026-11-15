@@ -7,6 +7,8 @@ import type { SwipeDirection } from "@/lib/domain/types";
  */
 export interface AnalyticsEvents {
   landing_viewed: Record<string, never>;
+  /** A card in the landing page's "try it" deck was swiped. */
+  landing_demo_swiped: { listingId: string; direction: SwipeDirection };
   car_flow_opened: { source: "landing" | "deck" | "details" | "garage" };
   car_saved: { make: string; model: string; year: number };
   preference_changed: { direction: "any" | "up" | "down"; budget: number; minCash: number };

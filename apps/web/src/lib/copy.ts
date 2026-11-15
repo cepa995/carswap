@@ -247,38 +247,55 @@ export const copy = {
     equationEmptyDown: "Za toliko keša nema zamene. Povuci klizač ulevo.",
     garage: "Garaža",
     howTitle: "Kako ide zamena",
+    howLead: "Četiri koraka, od tvog auta do ključa drugog.",
     steps: [
       {
         title: "Reci šta voziš",
-        body: "Marka, model, godište, kilometraža. Za deset sekundi znaš koliko okvirno vredi.",
+        body: "Marka, model, godište i kilometraža. Za deset sekundi znaš koliko okvirno vredi.",
+      },
+      {
+        title: "Skuplji ili jeftiniji?",
+        body: "Za skuplji doplaćuješ, za jeftiniji dobijaš keš. Biraš jednim dodirom.",
       },
       {
         title: "Prevlači",
-        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko doplaćuješ ili koliko keša dobijaš.",
+        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko sve izađe: doplata, porez, papiri i registracija.",
       },
       {
         title: "Može zamena",
         body: "Auto-kuća uzima tvoj auto u zamenu. Slede pregled, ugovor i notar, a mi te vodimo kroz svaki korak.",
       },
     ],
+    howEnd: "Ključevi su tvoji.",
+    // Under the cards in step three, which are real and can be swiped.
+    howTry: "Probaj ovde: prevuci karticu ili dodirni dugme.",
+    howPause: "Pauziraj",
+    howPlay: "Pusti",
+    howPhone: "Primer na telefonu",
     closingSteps: ["Pregled", "Ugovor", "Notar"],
-    whyTitle: "Zašto ne oglas?",
-    why: [
+    // Side by side with a classified ad, line for line.
+    versusTitle: "Zašto ne oglas?",
+    versusAd: "Preko oglasa",
+    versus: [
       {
-        title: "Bez oglasa",
-        body: "Ne slikaš, ne pišeš oglas i ne javljaš se na nepoznate brojeve.",
+        ad: "Slikaš, pišeš oglas i javljaš se na nepoznate brojeve.",
+        us: "Uneseš auto za deset sekundi. Bez oglasa.",
       },
       {
-        title: "Bez „poslednja cena?“",
-        body: "Doplatu vidiš unapred, na svakoj kartici. Nema cenkanja u porukama.",
+        ad: "„Koja je poslednja cena?“ u svakoj poruci.",
+        us: "Doplatu ili keš vidiš na svakoj kartici. Bez cenkanja.",
       },
       {
-        title: "Jedan dolazak",
-        body: "Dovezeš svoj, odvezeš drugi. Ne čekaš da se tvoj prvo proda.",
+        ad: "Porez i papire saznaš tek na šalteru.",
+        us: "Porez, papire i registraciju vidiš unapred.",
       },
       {
-        title: "Provereno pre potpisa",
-        body: "Istorija vozila, zaloga i lizing proveravaju se pre nego što bilo šta potpišeš.",
+        ad: "Čekaš da se tvoj auto proda, pa tek onda kupuješ.",
+        us: "Dovezeš svoj, odvezeš drugi. Jedan dolazak.",
+      },
+      {
+        ad: "Istoriju vozila proveravaš kako znaš i umeš.",
+        us: "Istorija, zaloga i lizing proveravaju se pre potpisa.",
       },
     ],
     faqTitle: "Česta pitanja",

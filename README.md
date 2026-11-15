@@ -31,14 +31,14 @@ CI runs the format check, lint, typecheck, unit tests, a production build and th
 
 ## What the web app does today
 
-| Route                     | What is there                                                                       |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `/`                       | Landing page built around the "my car + X" equation, with a live slider             |
-| `/swipe`                  | The deck: drag or use the keyboard to like or pass, undo, open details              |
-| `/garage`                 | Cars you liked, each with its top-up, smallest first                                |
-| `/auto/[id]`              | One car at an address worth sending to someone                                      |
-| `/auto/[id]/[car]/[deal]` | The same car with the sender's swap, e.g. `/auto/skoda-octavia-3/golf/doplata-2400` |
-| `/credits`                | Author, licence and source for every demo photo                                     |
+| Route                     | What is there                                                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `/`                       | Landing page: the "my car + X" equation with a live slider, and a walkthrough of the four steps that can be tried in place |
+| `/swipe`                  | The deck: drag or use the keyboard to like or pass, undo, open details                                                     |
+| `/garage`                 | Cars you liked, each with its top-up, smallest first                                                                       |
+| `/auto/[id]`              | One car at an address worth sending to someone                                                                             |
+| `/auto/[id]/[car]/[deal]` | The same car with the sender's swap, e.g. `/auto/skoda-octavia-3/golf/doplata-2400`                                        |
+| `/credits`                | Author, licence and source for every demo photo                                                                            |
 
 There is no backend yet. The app runs on seed data, and what a visitor enters (their car, which way they want to trade, how much money is in play, and their swipes) is kept in `localStorage`.
 
@@ -59,7 +59,7 @@ apps/web/
     share/               share sheet and the button that opens it
     listing/             the page a shared link opens
     garage/              saved swaps
-    landing/             landing page sections
+    landing/             landing page sections, and the "how a swap goes" walkthrough with its scenes
     ui/                  shared primitives: button, sheet, slider, car chip, animated number
   src/lib/
     domain/              pure logic with unit tests: estimate, deal maths, deck order, costs
@@ -84,7 +84,9 @@ scripts/seed-photos/     builds the demo photo set from Wikimedia Commons
 - **A shared link is read back strictly.** Anyone can type `/auto/<id>/<car>/<deal>`, and the page and its preview print those numbers under our name. `parseSwap` in `lib/share.ts` accepts only a catalogue model and an amount that model could plausibly be credited; anything else redirects to the car without a swap. The links are not signed, so within those limits a link can still state a swap nobody was offered. Signing needs a server, which arrives with the API.
 - **Shared pages are always served whole.** Chat apps read the title and image from `<head>` without running scripts, and Next.js streams the title in later for clients it does not recognise as crawlers, Viber among them. Both `/auto` pages export `ensureStatic = "navigation"`, so a link nobody has opened before is rendered completely, then kept. An end-to-end test reads the raw HTML to keep it that way.
 - **Preview images are JPEG on purpose.** `next/og` writes PNG only, about 500 kB for an image with a photo in it, which some messengers will not fetch. `lib/og/share-image.tsx` re-encodes with `sharp` to about 100 kB and keeps the result with `use cache`. Set `NEXT_PUBLIC_SITE_URL` in production, or the preview tags point at localhost.
-- **`short:` is a Tailwind variant for low viewports.** A phone browser with its address bar showing leaves about 650px of height. The deck tightens itself there so the photo keeps its share of the card.
+- **`short:` is a Tailwind variant for low viewports.** A phone browser with its address bar showing leaves about 650px of height. The deck tightens itself there so the photo keeps its share of the card. The same styles apply inside anything marked `data-compact`.
+- **This is a phone app, and the landing page is laid out for a phone first.** "Kako ide zamena" (`components/landing/HowItWorks.tsx`) shows each step with a real piece of the app at the size it has on a phone. On a phone those pieces sit straight on the page, one step after another, and play as they scroll into view; nothing is drawn around them and nothing is pinned. On a desktop there is no phone around the page, so one is drawn and the same pieces take turns on its screen. Check any change to it at a phone-sized viewport (about 390 by 660) before a desktop one.
+- **The deck in that walkthrough is the real one.** It is `SwipeDeck` with the app's `CarCard`, so it cannot drift from the app. `scrollsWithPage` makes the card answer only to sideways drags and leaves vertical ones to the page; without it a thumb landing on the card could not scroll past. End-to-end tests send real touch gestures to check both.
 - **This is Next.js 16 with Cache Components.** Pages are prerendered to a static shell and routes are kept alive across navigation. Screens that depend on `localStorage` render only in the browser (`use(browser())` inside a Suspense boundary), and code that runs during prerender must not read the clock. `apps/web/AGENTS.md` points to the framework docs bundled in `node_modules/next/dist/docs/`; read the relevant guide before using an API from memory.
 - **Copy is Serbian only**, in one file. Car names always appear in the nominative and sentences avoid gendered verb forms; the comment at the top of `copy.ts` explains why.
 - **The product name is a working title**, read from `lib/brand.ts`.

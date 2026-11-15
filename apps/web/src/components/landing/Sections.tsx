@@ -1,15 +1,12 @@
-import { ArrowRight, Calculator, Check, KeyRound, MegaphoneOff, Plus, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Plus, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { buttonClass } from "@/components/ui/Button";
-import { CarChip } from "@/components/ui/CarChip";
 import { brand } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { estimateValue } from "@/lib/domain/valuation";
-import { formatEur, formatInt } from "@/lib/format";
-import { EXAMPLE_CAR, REFERENCE_YEAR } from "@/lib/reference";
+import { examples } from "./how-examples";
 
 export function SiteHeader() {
   return (
@@ -43,116 +40,69 @@ function SectionHeading({ children }: { children: string }) {
   );
 }
 
-// ── How it works ─────────────────────────────────────────────────────────
+// ── Side by side with a classified ad ────────────────────────────────────
 
-// Worked out with the same estimate the app uses, so the example cannot drift from the product.
-const exampleEstimate = estimateValue(EXAMPLE_CAR, REFERENCE_YEAR);
-
-const stepArt: ReactNode[] = [
-  <div key="car" className="flex flex-col items-start gap-3">
-    <CarChip className="text-lg">
-      {EXAMPLE_CAR.model} · {EXAMPLE_CAR.year}
-    </CarChip>
-    <p className="font-display text-[1.7rem] leading-none font-extrabold tracking-tight tabular-nums">
-      {formatInt(exampleEstimate.low)} – {formatEur(exampleEstimate.high)}
-    </p>
-  </div>,
-
-  <div key="swipe" className="relative h-28 w-24">
-    <div className="absolute inset-x-2 top-0 bottom-1 -rotate-[10deg] rounded-2xl bg-hover ring-1 ring-line-strong" />
-    <div className="absolute inset-x-2 top-0 bottom-1 rotate-[8deg] rounded-2xl bg-linear-to-b from-[#d9c6ae] to-[#2b211b] shadow-float ring-1 ring-black/10">
-      <span className="absolute top-3 -left-6 -rotate-12 rounded-lg border-[3px] border-accent bg-chip px-1.5 py-0.5 font-display text-base leading-none font-extrabold text-accent-strong">
-        {copy.deck.stampLike}
-      </span>
-      <span className="absolute inset-x-2.5 bottom-2.5 h-2 rounded-full bg-white/25" />
-      <span className="absolute bottom-6 left-2.5 h-2 w-8 rounded-full bg-white/40" />
-    </div>
-  </div>,
-
-  <div key="match" className="flex flex-col items-start gap-3">
-    <span className="-rotate-3 rounded-2xl bg-accent px-3.5 py-2 font-display text-2xl leading-none font-extrabold text-on-accent">
-      {copy.match.title}
-    </span>
-    <ul className="flex flex-wrap gap-1.5 text-xs font-medium text-fg-muted">
-      {copy.landing.closingSteps.map((item) => (
-        <li key={item} className="flex items-center gap-1 rounded-full bg-hover px-2.5 py-1">
-          <Check className="size-3 text-accent-strong" strokeWidth={3} aria-hidden />
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>,
-];
-
-export function HowItWorks() {
+function Mark({ ours }: { ours: boolean }) {
+  const Icon = ours ? Check : X;
   return (
-    <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <SectionHeading>{copy.landing.howTitle}</SectionHeading>
-      <ol className="mt-10 grid gap-4 md:grid-cols-3">
-        {copy.landing.steps.map((step, index) => (
-          <li key={step.title} className="reveal flex flex-col rounded-card bg-surface p-3 ring-1 ring-line ring-inset">
-            <div
-              aria-hidden
-              className="flex h-44 items-center justify-center rounded-[1.4rem] bg-raised/70 px-5 ring-1 ring-line ring-inset"
-            >
-              {stepArt[index]}
-            </div>
-            <div className="p-4 pt-5">
-              <p className="font-display text-sm font-bold tracking-wider text-accent-strong tabular-nums">
-                0{index + 1}
-              </p>
-              <h3 className="mt-1 font-display text-2xl font-bold tracking-tight">{step.title}</h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-pretty text-fg-muted">{step.body}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-    </section>
+    <span
+      aria-hidden
+      className={cn(
+        "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full",
+        ours ? "bg-accent text-on-accent" : "bg-hover text-fg-faint",
+      )}
+    >
+      <Icon className="size-3.5" strokeWidth={3} />
+    </span>
   );
 }
 
-// ── Why not a classified ad ──────────────────────────────────────────────
-
-const whyIcons = [MegaphoneOff, Calculator, KeyRound, ShieldCheck];
-
+/**
+ * The same five moments of changing a car, done through an ad and done here.
+ * Two columns where there is room; on a phone each pair is one card, the ad's
+ * way on top and ours under it, each with its own label.
+ */
 export function WhyNotAnAd() {
+  const label = "mb-0.5 block text-[11px] font-semibold tracking-wider uppercase sm:sr-only";
+
   return (
     <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <SectionHeading>{copy.landing.whyTitle}</SectionHeading>
-      <ul className="mt-10 grid gap-4 sm:grid-cols-2">
-        {copy.landing.why.map((point, index) => {
-          const Icon = whyIcons[index];
-          return (
+      <SectionHeading>{copy.landing.versusTitle}</SectionHeading>
+
+      <div className="mt-10 sm:overflow-hidden sm:rounded-card sm:bg-surface sm:shadow-card sm:ring-1 sm:ring-line">
+        <div aria-hidden className="hidden grid-cols-2 sm:grid">
+          <p className="bg-raised/70 px-7 pt-6 pb-4 text-sm font-semibold tracking-wider text-fg-faint uppercase">
+            {copy.landing.versusAd}
+          </p>
+          <p className="px-7 pt-5 pb-4">
+            <Wordmark />
+          </p>
+        </div>
+
+        <ul className="flex flex-col gap-3 sm:gap-0">
+          {copy.landing.versus.map((row) => (
             <li
-              key={point.title}
-              className={cn(
-                "reveal flex gap-5 rounded-card p-6 ring-1 ring-inset",
-                index === 1 ? "bg-accent-strong text-on-accent ring-transparent" : "bg-surface ring-line",
-              )}
+              key={row.us}
+              className="reveal overflow-hidden rounded-3xl bg-surface ring-1 ring-line ring-inset sm:grid sm:grid-cols-2 sm:rounded-none sm:border-t sm:border-line sm:ring-0"
             >
-              <span
-                className={cn(
-                  "flex size-12 shrink-0 items-center justify-center rounded-2xl",
-                  index === 1 ? "bg-on-accent/15" : "bg-raised text-accent-strong",
-                )}
-              >
-                <Icon className="size-6" aria-hidden />
-              </span>
-              <div>
-                <h3 className="font-display text-2xl leading-tight font-bold tracking-tight">{point.title}</h3>
-                <p
-                  className={cn(
-                    "mt-1.5 text-[15px] leading-relaxed text-pretty",
-                    index === 1 ? "text-on-accent/90" : "text-fg-muted",
-                  )}
-                >
-                  {point.body}
-                </p>
-              </div>
+              <p className="flex gap-3 bg-raised/70 px-5 py-3.5 text-[15px] leading-snug text-fg-muted sm:px-7 sm:py-5 sm:leading-normal">
+                <Mark ours={false} />
+                <span>
+                  <span className={cn(label, "text-fg-faint")}>{copy.landing.versusAd}</span>
+                  {row.ad}
+                </span>
+              </p>
+              <p className="flex gap-3 px-5 py-4 leading-snug font-semibold sm:px-7 sm:py-5 sm:text-lg sm:leading-snug">
+                <Mark ours />
+                <span>
+                  <span className={cn(label, "text-accent-strong")}>{brand.name}</span>
+                  {row.us}
+                </span>
+              </p>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
@@ -182,12 +132,29 @@ export function Faq() {
 
 // ── Closing call to action and footer ────────────────────────────────────
 
+/** A car caught mid-swipe, liked: the one thing the closing line is about. */
+function LikedCard({ src, sizes, className }: { src: string; sizes: string; className?: string }) {
+  return (
+    <div aria-hidden className={cn("pointer-events-none", className)}>
+      <div className="relative aspect-[3/2] overflow-hidden rounded-[1.75rem] shadow-card ring-4 ring-white">
+        <Image src={src} alt="" fill sizes={sizes} className="object-cover" />
+      </div>
+      <span className="absolute -top-3 -left-4 -rotate-12 rounded-xl border-4 border-accent bg-chip px-3 py-1.5 font-display text-2xl leading-none font-extrabold text-accent-strong shadow-float">
+        {copy.deck.stampLike}
+      </span>
+    </div>
+  );
+}
+
 export function Closing() {
+  // The car the walkthrough above starts its deck with.
+  const { src } = examples.deck[0].listing.photo;
+
   return (
     <section className="mx-auto max-w-6xl px-5 pt-8 pb-16 lg:px-8">
       <div className="reveal relative overflow-hidden rounded-[2.5rem] bg-accent-strong px-7 py-14 text-on-accent sm:px-14 sm:py-20">
         <div aria-hidden className="pointer-events-none absolute inset-0 grain opacity-20 mix-blend-multiply" />
-        <h2 className="relative max-w-3xl font-display text-[2.6rem] leading-[0.95] font-extrabold tracking-[-0.03em] text-balance sm:text-6xl">
+        <h2 className="relative max-w-3xl font-display text-[2.6rem] leading-[0.95] font-extrabold tracking-[-0.03em] text-balance sm:text-6xl lg:max-w-xl">
           {copy.landing.closingTitle}
         </h2>
         <Link
@@ -198,6 +165,19 @@ export function Closing() {
           {copy.landing.cta}
           <ArrowRight className="size-5" aria-hidden />
         </Link>
+
+        {/* On a phone the card leans in from the bottom corner, cut off by the block's edge. */}
+        <LikedCard
+          src={src}
+          sizes="16rem"
+          className="relative mt-12 -mb-28 ml-auto w-[15.5rem] -rotate-6 sm:-mb-36 lg:hidden"
+        />
+        {/* With room to the side, it sits there whole. */}
+        <LikedCard
+          src={src}
+          sizes="21rem"
+          className="absolute top-1/2 right-12 hidden w-[17rem] -translate-y-1/2 rotate-[8deg] lg:block xl:w-[21rem]"
+        />
       </div>
     </section>
   );

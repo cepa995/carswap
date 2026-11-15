@@ -12,11 +12,13 @@ interface AnimatedNumberProps {
   format?: (value: number) => string;
   /** Count up from this on first appearance instead of starting at `value`. */
   from?: number;
+  /** Seconds to wait before the first count, for a number that is part of a staged entrance. */
+  delay?: number;
   className?: string;
 }
 
 /** A number that counts to its new value instead of jumping. */
-export function AnimatedNumber({ value, format = formatInt, from, className }: AnimatedNumberProps) {
+export function AnimatedNumber({ value, format = formatInt, from, delay = 0, className }: AnimatedNumberProps) {
   const node = useRef<HTMLSpanElement>(null);
   const shown = useRef(from ?? value);
   // React renders the first value only; later updates are written straight to
@@ -35,6 +37,7 @@ export function AnimatedNumber({ value, format = formatInt, from, className }: A
     }
     const controls = animate(start, value, {
       duration: 0.55,
+      delay,
       ease: easeOutExpo,
       onUpdate: (latest) => {
         shown.current = latest;
@@ -42,7 +45,7 @@ export function AnimatedNumber({ value, format = formatInt, from, className }: A
       },
     });
     return () => controls.stop();
-  }, [value, format, reduceMotion]);
+  }, [value, format, delay, reduceMotion]);
 
   return (
     <span ref={node} className={cn("tabular-nums", className)}>

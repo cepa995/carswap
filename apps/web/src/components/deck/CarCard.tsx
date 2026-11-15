@@ -14,6 +14,12 @@ interface CarCardProps {
   car: UserCar | null;
   /** The card on top of the deck: its photo is fetched ahead of the ones waiting beneath it. */
   priority?: boolean;
+  /**
+   * For a card shown outside the deck screen, e.g. far down a page: fetch the
+   * photo when it is about to be seen, and give the name a heading level that
+   * fits where the card sits.
+   */
+  embedded?: boolean;
 }
 
 /**
@@ -25,8 +31,9 @@ interface CarCardProps {
  * area at its own proportions, and a blurred copy of it carries the sky on
  * above, so the whole car stays in view on any screen.
  */
-export function CarCard({ card, car, priority = false }: CarCardProps) {
+export function CarCard({ card, car, priority = false, embedded = false }: CarCardProps) {
   const { listing, dealer, deal } = card;
+  const Title = embedded ? "h4" : "h2";
   const display = describeDeal(deal, listing);
   const specs = [String(listing.year), formatKm(listing.km), fuelLabel[listing.fuel], gearboxLabel[listing.gearbox]];
 
@@ -41,7 +48,7 @@ export function CarCard({ card, car, priority = false }: CarCardProps) {
               alt={`${listing.make} ${listing.model}, ${listing.color}`}
               fill
               sizes="(max-width: 30rem) 100vw, 28rem"
-              loading="eager"
+              loading={embedded ? "lazy" : "eager"}
               fetchPriority={priority ? "high" : "auto"}
               draggable={false}
               className="pointer-events-none object-cover"
@@ -59,9 +66,9 @@ export function CarCard({ card, car, priority = false }: CarCardProps) {
       </div>
 
       <div className="shrink-0 p-5 pt-4 short:p-4 short:pt-3.5">
-        <h2 className="font-display text-[1.75rem] leading-none font-bold tracking-tight text-balance short:text-2xl short:leading-none">
+        <Title className="font-display text-[1.75rem] leading-none font-bold tracking-tight text-balance short:text-2xl short:leading-none">
           {listing.make} {listing.model}
-        </h2>
+        </Title>
         <p className="mt-1.5 truncate text-sm text-fg-muted">{listing.variant}</p>
 
         {/* Chips where there is room. On a short screen they can wrap to a second

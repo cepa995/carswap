@@ -22,6 +22,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { cn } from "@/lib/cn";
 import type { SwipeDirection } from "@/lib/domain/types";
 import { haptic } from "@/lib/haptics";
 import { springs } from "@/lib/motion";
@@ -67,6 +68,14 @@ interface SwipeDeckProps<T> {
    * its own. For visitors who have not swiped anything yet.
    */
   nudge?: boolean;
+  /** How long to wait before that demonstration. */
+  nudgeAfterMs?: number;
+  /**
+   * The deck sits in a page that scrolls, not on a screen of its own. Only
+   * sideways drags move the card then; up and down are left to the page, so a
+   * thumb that lands on the card can still scroll past it.
+   */
+  scrollsWithPage?: boolean;
   ref?: Ref<SwipeDeckHandle>;
 }
 
@@ -93,6 +102,8 @@ export function SwipeDeck<T>({
   stamps,
   intent,
   nudge = false,
+  nudgeAfterMs = NUDGE_DELAY_MS,
+  scrollsWithPage = false,
   ref,
 }: SwipeDeckProps<T>) {
   const ownIntent = useMotionValue(0);
@@ -153,6 +164,8 @@ export function SwipeDeck<T>({
           leaving={card.leaving}
           enterFrom={exits[card.id] ?? null}
           nudge={nudge}
+          nudgeAfterMs={nudgeAfterMs}
+          scrollsWithPage={scrollsWithPage}
           signed={signed}
           progress={progress}
           stamps={stamps}
@@ -175,6 +188,8 @@ interface SwipeCardProps {
   /** Set when this card was swiped earlier: it re-enters from that side. */
   enterFrom: SwipeDirection | null;
   nudge: boolean;
+  nudgeAfterMs: number;
+  scrollsWithPage: boolean;
   signed: MotionValue<number>;
   progress: MotionValue<number>;
   stamps: { like: string; pass: string };
@@ -194,6 +209,8 @@ function SwipeCard({
   leaving,
   enterFrom,
   nudge,
+  nudgeAfterMs,
+  scrollsWithPage,
   signed,
   progress,
   stamps,
@@ -205,6 +222,8 @@ function SwipeCard({
   const reduceMotion = useReducedMotion() ?? false;
   const isTop = depth === 0 && leaving === null;
   const element = useRef<HTMLDivElement>(null);
+  // On a screen of its own the card takes every touch; in a page it leaves vertical ones to scrolling.
+  const touch = scrollsWithPage ? "touch-pan-y" : "touch-none";
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -283,14 +302,14 @@ function SwipeCard({
     let controls: ReturnType<typeof animate> | undefined;
     const timer = window.setTimeout(() => {
       controls = animate(x, [0, 62, 0, -52, 0], { duration: 2, times: [0, 0.24, 0.5, 0.74, 1], ease: "easeInOut" });
-    }, NUDGE_DELAY_MS);
+    }, nudgeAfterMs);
     const stop = () => {
       window.clearTimeout(timer);
       controls?.stop();
     };
     stopNudge.current = stop;
     return stop;
-  }, [nudge, isTop, reduceMotion, x]);
+  }, [nudge, nudgeAfterMs, isTop, reduceMotion, x]);
 
   function handlePointerDown() {
     dragged.current = false;
@@ -346,9 +365,9 @@ function SwipeCard({
     >
       <motion.div
         ref={element}
-        className={isTop ? "size-full cursor-grab touch-none active:cursor-grabbing" : "size-full"}
+        className={cn("size-full", isTop && "cursor-grab active:cursor-grabbing", isTop && touch)}
         style={{ x, y, rotate, willChange: isTop || leaving ? "transform" : undefined }}
-        drag={isTop}
+        drag={isTop ? (scrollsWithPage ? "x" : true) : false}
         dragMomentum={false}
         onPointerDown={handlePointerDown}
         onDragStart={handleDragStart}

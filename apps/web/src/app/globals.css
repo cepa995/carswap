@@ -2,8 +2,17 @@
 
 /* A phone browser with its address bar showing leaves about 650px of height,
    which is what most visitors get. `short:` tightens the deck there so the
-   photo keeps its share of the card. */
-@custom-variant short (@media (max-height: 46rem));
+   photo keeps its share of the card. The same tightening applies inside
+   anything marked `data-compact`, such as the phone drawn on the landing page,
+   whose screen is that small whatever the window around it. */
+@custom-variant short {
+  @media (max-height: 46rem) {
+    @slot;
+  }
+  &:where([data-compact] *) {
+    @slot;
+  }
+}
 
 /* ─────────────────────────────────────────────────────────────────────────
    Design tokens. Three colours, each with one job:
@@ -315,6 +324,25 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── "Kako ide zamena" ─────────────────────────────────────────────────────
+   On a desktop the steps take turns on a drawn phone. The bar under the step
+   that has the screen fills while it plays, and its end is what hands over to
+   the next. A CSS animation, so it can be paused in place. */
+
+.how-fill {
+  transform-origin: left;
+  animation: how-fill linear both;
+}
+
+@keyframes how-fill {
+  from {
+    scale: 0 1;
+  }
+  to {
+    scale: 1 1;
   }
 }
 

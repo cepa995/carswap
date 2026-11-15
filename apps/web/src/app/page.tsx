@@ -1,5 +1,6 @@
 import { Hero } from "@/components/landing/Hero";
-import { Closing, Faq, HowItWorks, SiteFooter, SiteHeader, WhyNotAnAd } from "@/components/landing/Sections";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Closing, Faq, SiteFooter, SiteHeader, WhyNotAnAd } from "@/components/landing/Sections";
 import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function LandingPage() {

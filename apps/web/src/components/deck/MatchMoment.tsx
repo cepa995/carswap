@@ -150,7 +150,7 @@ export function MatchMoment({ card, car, onContinue, onOpenGarage }: MatchMoment
                     {dealLine(describeDeal(shown.deal, shown.listing), car?.model ?? null)}
                   </p>
                   <p className="mt-2 text-[15px] font-medium">{copy.match.body(shown.dealer.name)}</p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-fg/85">{copy.match.note}</p>
+                  <p className="mt-2 text-[13px] leading-relaxed">{copy.match.note}</p>
                 </motion.div>
 
                 <motion.div
