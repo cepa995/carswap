@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeftRight, Check, Heart, X } from "lucide-react";
-import { AnimatePresence, motion, useMotionValue, useTransform } from "motion/react";
+import { AnimatePresence, motion, useMotionValue, useTransform, type Variants } from "motion/react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { CarCard } from "@/components/deck/CarCard";
@@ -19,6 +19,7 @@ import { haptic } from "@/lib/haptics";
 import { springs } from "@/lib/motion";
 import { EXAMPLE_CAR } from "@/lib/reference";
 import { listingName } from "@/lib/share";
+import { pop, rise, stage, type Phase } from "./entrance";
 import { exampleEstimate, examples } from "./how-examples";
 
 /**
@@ -30,12 +31,11 @@ import { exampleEstimate, examples } from "./how-examples";
  * the deck is the app's own swipe deck with the app's own card, so a visitor
  * can try the gesture before going anywhere.
  *
- * `still` means "do not perform": draw the finished picture and wait. That
- * is the state before a scene has scrolled into view, and the permanent one
- * for a visitor who has asked their device for less motion.
+ * Each takes the phase of its entrance (see `entrance.ts`): finished and
+ * still, waiting at its first frame, or performing.
  */
 export interface SceneProps {
-  still: boolean;
+  phase: Phase;
 }
 
 /** As wide as a phone's content column, at any breakpoint the scenes appear at. */
@@ -66,23 +66,23 @@ const FACTS = [
 const ESTIMATE_AT = 2.3;
 
 /** The five answers tick in one after another, then the estimate counts up. */
-export function CarScene({ still }: SceneProps) {
-  // Mounted afresh when it is time to perform, so the entrance starts from its first frame.
-  return <CarPanel key={String(still)} still={still} />;
-}
+export function CarScene({ phase }: SceneProps) {
+  // The numbers count from nothing only when performing, and start over each time they do.
+  const from = phase === "playing" ? 0 : undefined;
 
-function CarPanel({ still }: SceneProps) {
   return (
-    <div aria-hidden className="@container rounded-[2rem] bg-surface p-5 shadow-card ring-1 ring-line">
+    <motion.div
+      aria-hidden
+      className="@container rounded-[2rem] bg-surface p-5 shadow-card ring-1 ring-line"
+      {...stage(phase)}
+    >
       <p className="font-display text-2xl leading-none font-bold tracking-tight">{copy.wizard.title}</p>
       <ul className="mt-4 flex flex-wrap gap-1.5">
         {FACTS.map((fact, index) => (
           <motion.li
             key={fact}
+            variants={pop(0.3 + index * 0.36)}
             className="flex h-8 items-center gap-1.5 rounded-full bg-raised pr-2.5 pl-1.5 text-sm font-semibold ring-1 ring-line ring-inset"
-            initial={still ? false : { opacity: 0, scale: 0.7, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ ...springs.settle, delay: 0.3 + index * 0.36 }}
           >
             <span className="flex size-5 items-center justify-center rounded-full bg-accent text-on-accent">
               <Check className="size-3" strokeWidth={3.5} />
@@ -92,12 +92,7 @@ function CarPanel({ still }: SceneProps) {
         ))}
       </ul>
 
-      <motion.div
-        className="mt-5 border-t border-line pt-4"
-        initial={still ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: ESTIMATE_AT }}
-      >
+      <motion.div variants={rise(ESTIMATE_AT)} className="mt-5 border-t border-line pt-4">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-fg-muted">
           <CarChip className="text-base">
             {EXAMPLE_CAR.model} · {EXAMPLE_CAR.year}
@@ -105,12 +100,12 @@ function CarPanel({ still }: SceneProps) {
           {copy.wizard.resultLead}
         </div>
         <p className="mt-3 font-display text-[clamp(1.75rem,13cqw,2.75rem)] leading-none font-extrabold tracking-tight tabular-nums">
-          <AnimatedNumber value={exampleEstimate.low} from={still ? undefined : 0} delay={ESTIMATE_AT} />
+          <AnimatedNumber key={`low:${phase}`} value={exampleEstimate.low} from={from} delay={ESTIMATE_AT} />
           <span className="mx-[0.12em] text-fg-faint">–</span>
-          <AnimatedNumber value={exampleEstimate.high} from={still ? undefined : 0} delay={ESTIMATE_AT} /> €
+          <AnimatedNumber key={`high:${phase}`} value={exampleEstimate.high} from={from} delay={ESTIMATE_AT} /> €
         </p>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -129,20 +124,20 @@ const SHOW_OTHER_AFTER_MS = 2200;
  * a different kind of deal. Left alone, it flips to "cheaper" once by itself,
  * so the point is made even if nobody touches it.
  */
-export function DirectionScene({ still }: SceneProps) {
+export function DirectionScene({ phase }: SceneProps) {
   const [selected, setSelected] = useState(0);
   const [touched, setTouched] = useState(false);
   const [showingTap, setShowingTap] = useState(false);
 
   useEffect(() => {
-    if (still || touched) return;
+    if (phase !== "playing" || touched) return;
     const tap = window.setTimeout(() => setShowingTap(true), SHOW_OTHER_AFTER_MS - 350);
     const flip = window.setTimeout(() => setSelected(1), SHOW_OTHER_AFTER_MS);
     return () => {
       window.clearTimeout(tap);
       window.clearTimeout(flip);
     };
-  }, [still, touched]);
+  }, [phase, touched]);
 
   function choose(index: number) {
     setTouched(true);
@@ -280,7 +275,7 @@ interface SwipeSceneProps extends SceneProps {
  * runs out it deals again. Untouched, the top card leans each way once to
  * show what to do.
  */
-export function SwipeScene({ still, onMatch, fill = false }: SwipeSceneProps) {
+export function SwipeScene({ phase, onMatch, fill = false }: SwipeSceneProps) {
   const [remaining, setRemaining] = useState<readonly DeckCard[]>(examples.deck);
   const [touched, setTouched] = useState(false);
   const [toast, setToast] = useState<{ key: number; text: string } | null>(null);
@@ -325,7 +320,7 @@ export function SwipeScene({ still, onMatch, fill = false }: SwipeSceneProps) {
           getId={cardId}
           intent={intent}
           stamps={stamps}
-          nudge={!still && !touched}
+          nudge={phase !== "armed" && !touched}
           nudgeAfterMs={900}
           scrollsWithPage
           onSwipe={handleSwipe}
@@ -410,29 +405,35 @@ interface MatchSceneProps extends SceneProps {
 }
 
 /** The app's match moment, and after it the three things left to do, ticking off one by one. */
-export function MatchScene({ still, card = examples.deck[0], fill = false }: MatchSceneProps) {
-  return <MatchPanel key={`${card.listing.id}:${still}`} still={still} card={card} fill={fill} />;
+export function MatchScene({ phase, card = examples.deck[0], fill = false }: MatchSceneProps) {
+  // A new car to celebrate is a new celebration: mounted afresh, it starts from its first frame.
+  return <MatchPanel key={card.listing.id} phase={phase} card={card} fill={fill} />;
 }
 
-function MatchPanel({ still, card, fill }: Required<MatchSceneProps>) {
+const settleAt = (delay: number, from: object, to: object): Variants => ({
+  hidden: { opacity: 0, ...from },
+  shown: { opacity: 1, ...to, transition: { ...springs.bouncy, delay } },
+});
+
+function MatchPanel({ phase, card, fill }: Required<MatchSceneProps>) {
   const line = dealLine(describeDeal(card.deal, card.listing), EXAMPLE_CAR.model);
 
   return (
-    <div
+    <motion.div
       aria-hidden
       className={cn(
         "@container flex flex-col items-center justify-center overflow-hidden bg-accent-strong px-5 text-center dark-surface",
         // On a phone's screen it starts under the camera cut-out, so the picture needs room at the top.
         fill ? "absolute inset-0 pt-8" : "relative rounded-[2rem] py-11",
       )}
+      {...stage(phase)}
     >
       {/* The texture lies under everything else here, which is why the rest is `relative`. */}
       <div className="pointer-events-none absolute inset-0 grain opacity-25 mix-blend-multiply" />
 
       <div className="relative">
-        {still
-          ? null
-          : CONFETTI.map((piece, index) => (
+        {phase === "playing"
+          ? CONFETTI.map((piece, index) => (
               <motion.span
                 key={index}
                 className={cn(
@@ -444,51 +445,42 @@ function MatchPanel({ still, card, fill }: Required<MatchSceneProps>) {
                 animate={{ x: piece.x, y: piece.y, opacity: [0, 1, 1, 0], rotate: piece.rotate, scale: 1 }}
                 transition={{ duration: 1.25, delay: 0.14 + piece.delay, ease: [0.16, 1, 0.3, 1] }}
               />
-            ))}
+            ))
+          : null}
 
         <motion.div
+          variants={settleAt(0.06, { scale: 0.6, rotate: 14 }, { scale: 1, rotate: 3 })}
           className="relative aspect-[3/2] w-52 overflow-hidden rounded-[1.5rem] shadow-float ring-4 ring-fg"
-          initial={still ? false : { scale: 0.6, rotate: 14, opacity: 0 }}
-          animate={{ scale: 1, rotate: 3, opacity: 1 }}
-          transition={{ ...springs.bouncy, delay: 0.06 }}
         >
           <Image src={card.listing.photo.src} alt="" fill sizes={PHOTO_SIZES} className="object-cover" />
         </motion.div>
 
         <motion.div
+          variants={settleAt(0.24, { x: -70, rotate: -24 }, { x: 0, rotate: -8 })}
           className="absolute -bottom-4 -left-7"
-          initial={still ? false : { x: -70, rotate: -24, opacity: 0 }}
-          animate={{ x: 0, rotate: -8, opacity: 1 }}
-          transition={{ ...springs.bouncy, delay: 0.24 }}
         >
           <CarChip className="text-lg">{EXAMPLE_CAR.model}</CarChip>
         </motion.div>
 
         <motion.div
+          variants={{
+            hidden: { scale: 0, rotate: -180 },
+            shown: { scale: 1, rotate: 0, transition: { ...springs.bouncy, delay: 0.36 } },
+          }}
           className="absolute -right-5 -bottom-5 flex size-12 items-center justify-center rounded-full bg-canvas text-fg shadow-float"
-          initial={still ? false : { scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ ...springs.bouncy, delay: 0.36 }}
         >
           <ArrowLeftRight className="size-6" strokeWidth={2.6} />
         </motion.div>
       </div>
 
       <motion.p
+        variants={settleAt(0.18, { y: 22, scale: 0.9, rotate: -2 }, { y: 0, scale: 1, rotate: -2 })}
         className="relative mt-10 font-display text-[clamp(2.4rem,15cqw,3.4rem)] leading-[0.9] font-extrabold tracking-tight"
-        initial={still ? false : { y: 22, opacity: 0, scale: 0.9, rotate: -2 }}
-        animate={{ y: 0, opacity: 1, scale: 1, rotate: -2 }}
-        transition={{ ...springs.bouncy, delay: 0.18 }}
       >
         {copy.match.title}
       </motion.p>
 
-      <motion.div
-        className="relative"
-        initial={still ? false : { opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.45 }}
-      >
+      <motion.div variants={rise(0.45)} className="relative">
         <p className="mt-4 font-display text-xl leading-none font-bold tracking-tight">{line}</p>
         <p className="mt-2 text-[15px] font-medium text-pretty">{copy.match.body(card.dealer.name)}</p>
       </motion.div>
@@ -497,17 +489,16 @@ function MatchPanel({ still, card, fill }: Required<MatchSceneProps>) {
         {copy.landing.closingSteps.map((item, index) => (
           <motion.li
             key={item}
+            variants={rise(CHECKS_AT + index * 0.5, 10)}
             // Darker than the panel, not lighter: small light text needs the contrast.
             className="flex h-8 items-center gap-2 rounded-full bg-black/20 pr-3.5 pl-1.5 text-sm font-semibold"
-            initial={still ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: CHECKS_AT + index * 0.5 }}
           >
             <motion.span
+              variants={{
+                hidden: { scale: 0 },
+                shown: { scale: 1, transition: { ...springs.bouncy, delay: CHECKS_AT + 0.18 + index * 0.5 } },
+              }}
               className="flex size-5 items-center justify-center rounded-full bg-fg text-accent-strong"
-              initial={still ? false : { scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ ...springs.bouncy, delay: CHECKS_AT + 0.18 + index * 0.5 }}
             >
               <Check className="size-3" strokeWidth={4} />
             </motion.span>
@@ -515,6 +506,6 @@ function MatchPanel({ still, card, fill }: Required<MatchSceneProps>) {
           </motion.li>
         ))}
       </ul>
-    </div>
+    </motion.div>
   );
 }

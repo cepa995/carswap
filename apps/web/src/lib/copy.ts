@@ -273,46 +273,59 @@ export const copy = {
     howPlay: "Pusti",
     howPhone: "Primer na telefonu",
     closingSteps: ["Pregled", "Ugovor", "Notar"],
-    // Side by side with a classified ad, line for line.
+    // What changing a car through a classified ad is like, and what replaces it here.
     versusTitle: "Zašto ne oglas?",
+    versusLead: "Isti posao, bez onog napornog dela.",
     versusAd: "Preko oglasa",
-    versus: [
-      {
-        ad: "Slikaš, pišeš oglas i javljaš se na nepoznate brojeve.",
-        us: "Uneseš auto za deset sekundi. Bez oglasa.",
+    versus: {
+      price: {
+        instead: "Cenkanje u porukama",
+        title: "Cena piše na kartici",
+        body: "Doplatu ili keš vidiš pre nego što bilo koga pozoveš.",
       },
-      {
-        ad: "„Koja je poslednja cena?“ u svakoj poruci.",
-        us: "Doplatu ili keš vidiš na svakoj kartici. Bez cenkanja.",
+      costs: {
+        instead: "Porez i papire saznaš tek na šalteru",
+        title: "Sve ukupno, unapred",
+        body: "Porez, papiri i registracija stoje uz svaki auto.",
       },
-      {
-        ad: "Porez i papire saznaš tek na šalteru.",
-        us: "Porez, papire i registraciju vidiš unapred.",
+      time: {
+        instead: "Prvo prodaš svoj, pa tek onda kupuješ",
+        title: "Jedan dolazak",
+        body: "Dovezeš svoj, odvezeš drugi. Ne čekaš kupca.",
       },
-      {
-        ad: "Čekaš da se tvoj auto proda, pa tek onda kupuješ.",
-        us: "Dovezeš svoj, odvezeš drugi. Jedan dolazak.",
+      trust: {
+        instead: "Veruješ na reč",
+        title: "Provereno pre potpisa",
+        body: "Istorija vozila, zaloga i lizing proveravaju se pre nego što bilo šta potpišeš.",
       },
-      {
-        ad: "Istoriju vozila proveravaš kako znaš i umeš.",
-        us: "Istorija, zaloga i lizing proveravaju se pre potpisa.",
-      },
-    ],
+    },
+    // The messages everyone who has sold a car through an ad has received.
+    versusChat: ["„Koja je poslednja cena?“", "„Može 500 manje? Keš odmah.“", "„Menjaš za Pasata? Ti doplatiš.“"],
+    versusAdSteps: ["Oglas", "Pozivi", "Gledanja", "Cenkanje", "Prodaja", "Traženje", "Kupovina"],
+    versusAdTime: "Traje nedeljama.",
+    versusOurSteps: ["Izabereš", "Dovezeš svoj", "Odvezeš drugi"],
+    // What every ad says about its car.
+    versusClaims: ["„Nije udaran“", "„Garažiran“", "„Prvi vlasnik“", "„Kao nov“"],
+    versusChecks: ["Istorija vozila", "Zaloga", "Lizing"],
     faqTitle: "Česta pitanja",
     faq: [
       {
+        key: "estimate",
         q: "Da li je procena mog auta konačna?",
-        a: "Nije. To je okvirna vrednost prema marki, modelu, godištu i kilometraži. Konačan iznos daje auto-kuća kad pogleda auto.",
+        a: "Nije. To je okvirna vrednost prema marki, modelu, godištu i kilometraži, zato je i dajemo kao raspon. Konačan iznos daje auto-kuća kad pogleda auto.",
       },
       {
+        key: "cheaper",
         q: "Šta ako je auto koji želim jeftiniji od mog?",
         a: "Onda razliku dobijaš ti. Na kartici piše koliko.",
       },
       {
+        key: "phone",
         q: "Moram li da ostavim broj telefona?",
         a: "Za prevlačenje ne. Broj je potreban tek kad zatražiš ponudu.",
       },
       {
+        key: "dealers",
         q: "Koje auto-kuće učestvuju?",
         a: "Ovo je demo verzija: auto-kuće, vozila i cene su primeri. Prave ponude stižu sa prvim partnerima u Novom Sadu.",
       },

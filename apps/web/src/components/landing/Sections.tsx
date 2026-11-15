@@ -1,12 +1,20 @@
-import { ArrowRight, Check, Plus, X } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { DealSummary } from "@/components/deck/CarCard";
 import { buttonClass } from "@/components/ui/Button";
+import { CarChip } from "@/components/ui/CarChip";
 import { brand } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { examples } from "./how-examples";
+import { formatEur, formatInt } from "@/lib/format";
+import { EXAMPLE_CAR } from "@/lib/reference";
+import { dealers } from "@/lib/seed";
+import { listingName } from "@/lib/share";
+import { exampleEstimate, examples } from "./how-examples";
+import { SectionHeading } from "./SectionHeading";
 
 export function SiteHeader() {
   return (
@@ -32,97 +40,69 @@ export function SiteHeader() {
   );
 }
 
-function SectionHeading({ children }: { children: string }) {
-  return (
-    <h2 className="font-display text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-5xl">
-      {children}
-    </h2>
-  );
-}
-
-// ── Side by side with a classified ad ────────────────────────────────────
-
-function Mark({ ours }: { ours: boolean }) {
-  const Icon = ours ? Check : X;
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full",
-        ours ? "bg-accent text-on-accent" : "bg-hover text-fg-faint",
-      )}
-    >
-      <Icon className="size-3.5" strokeWidth={3} />
-    </span>
-  );
-}
+// ── Questions ────────────────────────────────────────────────────────────
 
 /**
- * The same five moments of changing a car, done through an ad and done here.
- * Two columns where there is room; on a phone each pair is one card, the ad's
- * way on top and ours under it, each with its own label.
+ * Where an answer is about something the app shows, the answer shows it: the
+ * estimate as the range it is, the deal on a cheaper car as a card has it,
+ * the dealers by name. Keyed by the `key` of each question in the copy.
  */
-export function WhyNotAnAd() {
-  const label = "mb-0.5 block text-[11px] font-semibold tracking-wider uppercase sm:sr-only";
-
-  return (
-    <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <SectionHeading>{copy.landing.versusTitle}</SectionHeading>
-
-      <div className="mt-10 sm:overflow-hidden sm:rounded-card sm:bg-surface sm:shadow-card sm:ring-1 sm:ring-line">
-        <div aria-hidden className="hidden grid-cols-2 sm:grid">
-          <p className="bg-raised/70 px-7 pt-6 pb-4 text-sm font-semibold tracking-wider text-fg-faint uppercase">
-            {copy.landing.versusAd}
-          </p>
-          <p className="px-7 pt-5 pb-4">
-            <Wordmark />
-          </p>
-        </div>
-
-        <ul className="flex flex-col gap-3 sm:gap-0">
-          {copy.landing.versus.map((row) => (
-            <li
-              key={row.us}
-              className="reveal overflow-hidden rounded-3xl bg-surface ring-1 ring-line ring-inset sm:grid sm:grid-cols-2 sm:rounded-none sm:border-t sm:border-line sm:ring-0"
-            >
-              <p className="flex gap-3 bg-raised/70 px-5 py-3.5 text-[15px] leading-snug text-fg-muted sm:px-7 sm:py-5 sm:leading-normal">
-                <Mark ours={false} />
-                <span>
-                  <span className={cn(label, "text-fg-faint")}>{copy.landing.versusAd}</span>
-                  {row.ad}
-                </span>
-              </p>
-              <p className="flex gap-3 px-5 py-4 leading-snug font-semibold sm:px-7 sm:py-5 sm:text-lg sm:leading-snug">
-                <Mark ours />
-                <span>
-                  <span className={cn(label, "text-accent-strong")}>{brand.name}</span>
-                  {row.us}
-                </span>
-              </p>
-            </li>
-          ))}
-        </ul>
+const faqPieces: Partial<Record<(typeof copy.landing.faq)[number]["key"], ReactNode>> = {
+  estimate: (
+    <div className="rounded-3xl bg-raised p-4">
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-sm font-medium text-fg-muted">
+        <CarChip className="text-[0.85rem]">
+          {EXAMPLE_CAR.model} · {EXAMPLE_CAR.year}
+        </CarChip>
+        {copy.wizard.resultLead}
       </div>
-    </section>
-  );
-}
-
-// ── Questions ────────────────────────────────────────────────────────────
+      <p className="mt-2 font-display text-[2rem] leading-none font-extrabold tracking-tight tabular-nums">
+        {formatInt(exampleEstimate.low)}
+        <span className="mx-[0.12em] text-fg-faint">–</span>
+        {formatEur(exampleEstimate.high)}
+      </p>
+    </div>
+  ),
+  cheaper: (
+    <div className="rounded-3xl bg-raised p-4">
+      <p className="mb-2.5 text-sm font-medium text-fg-muted">{listingName(examples.down.listing)}</p>
+      <DealSummary card={examples.down} car={EXAMPLE_CAR} />
+    </div>
+  ),
+  dealers: (
+    <ul className="flex flex-wrap gap-2">
+      {dealers.map((dealer) => (
+        <li key={dealer.id} className="rounded-full bg-raised px-3 py-1.5 text-sm font-medium">
+          {dealer.name}
+          <span className="text-fg-muted"> · {dealer.area}</span>
+        </li>
+      ))}
+    </ul>
+  ),
+};
 
 export function Faq() {
   return (
     <section className="mx-auto max-w-3xl px-5 py-16 lg:px-8 lg:py-24">
       <SectionHeading>{copy.landing.faqTitle}</SectionHeading>
-      <div className="mt-8 divide-y divide-line border-y border-line">
-        {copy.landing.faq.map((item) => (
-          <details key={item.q} className="group">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-lg font-semibold [&::-webkit-details-marker]:hidden">
+      <div className="mt-8 flex flex-col gap-2.5">
+        {copy.landing.faq.map((item, index) => (
+          // The first is open, so it is plain at a glance that these open and what is inside.
+          <details
+            key={item.key}
+            open={index === 0}
+            className="faq group rounded-3xl bg-surface ring-1 ring-line transition-shadow duration-300 ring-inset open:shadow-float"
+          >
+            <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 rounded-3xl px-5 py-4 text-[17px] leading-snug font-semibold [&::-webkit-details-marker]:hidden">
               {item.q}
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-raised text-fg-muted transition duration-300 ease-out-expo group-open:rotate-45 group-open:bg-accent group-open:text-on-accent">
                 <Plus className="size-4" strokeWidth={2.6} aria-hidden />
               </span>
             </summary>
-            <p className="max-w-2xl pb-6 text-[15px] leading-relaxed text-pretty text-fg-muted">{item.a}</p>
+            <div className="px-5 pb-5">
+              <p className="max-w-2xl text-[15px] leading-relaxed text-pretty text-fg-muted">{item.a}</p>
+              {faqPieces[item.key] ? <div className="mt-4 max-w-[24rem]">{faqPieces[item.key]}</div> : null}
+            </div>
           </details>
         ))}
       </div>

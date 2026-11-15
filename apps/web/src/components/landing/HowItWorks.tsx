@@ -9,7 +9,10 @@ import { buttonClass } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import type { DeckCard } from "@/lib/domain/deck";
+import { useHydrated } from "@/lib/hydrated";
+import { useEntrance, type Phase } from "./entrance";
 import { CarScene, DirectionScene, MatchScene, SwipeScene } from "./HowScenes";
+import { SectionHeading } from "./SectionHeading";
 
 const steps = copy.landing.steps;
 
@@ -29,9 +32,7 @@ const steps = copy.landing.steps;
 export function HowItWorks() {
   return (
     <section className="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-24">
-      <h2 className="font-display text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-5xl">
-        {copy.landing.howTitle}
-      </h2>
+      <SectionHeading>{copy.landing.howTitle}</SectionHeading>
       <p className="mt-3 text-lg text-pretty text-fg-muted">{copy.landing.howLead}</p>
 
       <DownThePage />
@@ -84,21 +85,20 @@ function DownThePage() {
     // A swiped card leaves sideways; clipping at the screen's edge keeps it from widening the page.
     <div className="-mx-5 overflow-x-clip px-5 lg:hidden">
       <ol className="mt-10">
-        <Step index={0}>{(still) => <CarScene still={still} />}</Step>
-        <Step index={1}>{(still) => <DirectionScene still={still} />}</Step>
-        <Step index={2}>{(still) => <SwipeScene still={still} onMatch={setMatched} />}</Step>
-        <Step index={3}>{(still) => <MatchScene still={still} card={matched ?? undefined} />}</Step>
+        <Step index={0}>{(phase) => <CarScene phase={phase} />}</Step>
+        <Step index={1}>{(phase) => <DirectionScene phase={phase} />}</Step>
+        <Step index={2}>{(phase) => <SwipeScene phase={phase} onMatch={setMatched} />}</Step>
+        <Step index={3}>{(phase) => <MatchScene phase={phase} card={matched ?? undefined} />}</Step>
       </ol>
       <Finish className="mt-10" />
     </div>
   );
 }
 
-function Step({ index, children }: { index: number; children: (still: boolean) => ReactNode }) {
+function Step({ index, children }: { index: number; children: (phase: Phase) => ReactNode }) {
   const scene = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion() ?? false;
   // A scene performs once, when enough of it is on screen to be watched.
-  const seen = useInView(scene, { amount: 0.4, once: true });
+  const phase = useEntrance(scene, 0.4);
   const step = steps[index];
 
   return (
@@ -111,7 +111,7 @@ function Step({ index, children }: { index: number; children: (still: boolean) =
         <p className="mt-3 leading-relaxed text-pretty text-fg-muted">{step.body}</p>
       </div>
       <div ref={scene} className="mt-5 sm:mt-0">
-        {children(reduceMotion || !seen)}
+        {children(phase)}
       </div>
     </li>
   );
@@ -126,19 +126,27 @@ const MATCH_AFTER_MS = 650;
 
 function OnADrawnPhone() {
   const reduceMotion = useReducedMotion() ?? false;
+  const hydrated = useHydrated();
   const phone = useRef<HTMLDivElement>(null);
   const onScreen = useInView(phone, { amount: 0.4 });
+  const entrance = useEntrance(phone, 0.4);
 
   const [active, setActive] = useState(0);
   /** Goes up each time a step takes the screen, so its timer starts from nothing. */
   const [take, setTake] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
-  const [seen, setSeen] = useState(false);
   const [matched, setMatched] = useState<DeckCard | null>(null);
-  if (onScreen && !seen) setSeen(true);
 
-  // Only the step on screen performs; the rest hold their finished picture, out of sight.
-  const stillAt = (index: number) => reduceMotion || !seen || index !== active;
+  // Only the step that has the screen performs. The others wait at their first
+  // frame, out of sight, so each starts from the beginning when its turn comes.
+  const phaseAt = (index: number): Phase => {
+    if (reduceMotion || !hydrated) return "static";
+    if (index !== active) return "armed";
+    // Until the tour has moved on, the first step follows the phone itself:
+    // waiting while the phone is below the screen, left as drawn if it was on
+    // screen from the start.
+    return take === 0 ? entrance : "playing";
+  };
 
   function show(index: number) {
     setActive(index);
@@ -162,10 +170,10 @@ function OnADrawnPhone() {
   }
 
   const scenes: ReadonlyArray<{ fullScreen?: boolean; scene: ReactNode }> = [
-    { scene: <CarScene still={stillAt(0)} /> },
-    { scene: <DirectionScene still={stillAt(1)} /> },
-    { scene: <SwipeScene still={stillAt(2)} onMatch={handleMatch} fill /> },
-    { fullScreen: true, scene: <MatchScene still={stillAt(3)} card={matched ?? undefined} fill /> },
+    { scene: <CarScene phase={phaseAt(0)} /> },
+    { scene: <DirectionScene phase={phaseAt(1)} /> },
+    { scene: <SwipeScene phase={phaseAt(2)} onMatch={handleMatch} fill /> },
+    { fullScreen: true, scene: <MatchScene phase={phaseAt(3)} card={matched ?? undefined} fill /> },
   ];
 
   return (

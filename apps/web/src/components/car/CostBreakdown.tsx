@@ -44,29 +44,34 @@ interface CostBreakdownProps {
   swapLine?: { label: string; value: string } | null;
   /** Everything on the day, added up. Left out when there is no swap to add to. */
   total?: { receives: boolean; amount: number } | null;
+  /** Only the rows: no small print and no panel around them, for a place that brings its own. */
+  compact?: boolean;
 }
 
 /**
  * What an ad leaves for the counter: the tax, the paperwork, what it all comes
  * to on the day, and a year of registration.
  */
-export function CostBreakdown({ costs, chargesVat, swapLine, total }: CostBreakdownProps) {
+export function CostBreakdown({ costs, chargesVat, swapLine, total, compact = false }: CostBreakdownProps) {
+  // In the compact form the notes are dropped; the figures stand by themselves.
+  const note = (text: string) => (compact ? undefined : text);
+
   return (
-    <div className="rounded-2xl bg-raised p-4">
+    <div className={compact ? undefined : "rounded-2xl bg-raised p-4"}>
       {swapLine ? <DetailRow label={swapLine.label} value={swapLine.value} /> : null}
       <DetailRow
         label={copy.costs.transferTax}
         value={costs.transferTax === 0 ? formatEur(0) : copy.costs.about(formatEur(costs.transferTax))}
-        note={
+        note={note(
           chargesVat
             ? copy.costs.transferTaxVat(formatEur(costs.privateSaleTransferTax))
-            : copy.costs.transferTaxPrivate
-        }
+            : copy.costs.transferTaxPrivate,
+        )}
       />
       <DetailRow
         label={copy.costs.paperwork}
         value={copy.costs.about(formatEur(costs.paperwork))}
-        note={copy.costs.paperworkNote}
+        note={note(copy.costs.paperworkNote)}
       />
       {total ? (
         <>
@@ -75,7 +80,7 @@ export function CostBreakdown({ costs, chargesVat, swapLine, total }: CostBreakd
             strong
             label={total.receives ? copy.costs.totalReceive : copy.costs.totalPay}
             value={copy.costs.about(formatEur(total.amount))}
-            note={copy.costs.onTheDay}
+            note={note(copy.costs.onTheDay)}
           />
         </>
       ) : null}
@@ -83,11 +88,13 @@ export function CostBreakdown({ costs, chargesVat, swapLine, total }: CostBreakd
       <DetailRow
         label={copy.costs.registrationYear}
         value={copy.costs.about(registrationRange(costs))}
-        note={copy.costs.registrationNote}
+        note={note(copy.costs.registrationNote)}
       />
-      <p className="mt-3 text-[13px] leading-relaxed text-fg-faint">
-        {copy.costs.footnote(TARIFFS_CHECKED_ON.slice(0, 4))}
-      </p>
+      {compact ? null : (
+        <p className="mt-3 text-[13px] leading-relaxed text-fg-faint">
+          {copy.costs.footnote(TARIFFS_CHECKED_ON.slice(0, 4))}
+        </p>
+      )}
     </div>
   );
 }

@@ -82,7 +82,7 @@ export function CarCard({ card, car, priority = false, embedded = false }: CarCa
         </ul>
         <p className="mt-1 hidden truncate text-sm font-medium tabular-nums short:block">{specs.join(" · ")}</p>
 
-        <DealPanel card={card} display={display} car={car} />
+        <DealPanel card={card} car={car} />
       </div>
     </article>
   );
@@ -133,16 +133,27 @@ function Flag({ flag }: { flag: NonNullable<DealDisplay["flag"]> }) {
  * the two figures an ad never shows: everything included on the day, and what
  * the car then costs to keep registered.
  */
-function DealPanel({ card, display, car }: { card: DeckCard; display: DealDisplay; car: UserCar | null }) {
-  const { listing, deal, costs } = card;
+function DealPanel({ card, car }: { card: DeckCard; car: UserCar | null }) {
+  return (
+    <div className="mt-4 rounded-3xl bg-raised p-4 short:mt-3 short:p-3.5">
+      <DealSummary card={card} car={car} />
+      <CostCaption deal={card.deal} costs={card.costs} />
+    </div>
+  );
+}
+
+/**
+ * The headline of a card's deal by itself: whose car, which way the money
+ * goes, how much, and the asking price. Exported for places that show a deal
+ * without the card around it.
+ */
+export function DealSummary({ card, car }: { card: DeckCard; car: UserCar | null }) {
+  const display = describeDeal(card.deal, card.listing);
   const showsSwap = display.kind !== "price" && car !== null;
 
   return (
-    <div className="mt-4 rounded-3xl bg-raised p-4 short:mt-3 short:p-3.5">
-      <div className="flex items-end justify-between gap-3">
-        <DealFigure display={display} car={car} showsSwap={showsSwap} price={listing.priceEur} />
-      </div>
-      <CostCaption deal={deal} costs={costs} />
+    <div className="flex items-end justify-between gap-3">
+      <DealFigure display={display} car={car} showsSwap={showsSwap} price={card.listing.priceEur} />
     </div>
   );
 }
