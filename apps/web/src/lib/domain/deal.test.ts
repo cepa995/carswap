@@ -9,6 +9,7 @@ const dealer: Dealer = {
   name: "Test Auto",
   area: "Centar",
   city: "Novi Sad",
+  chargesVat: true,
   rules: { creditFactor: 0.9, maxAgeYears: 15, maxKm: 250_000 },
 };
 
@@ -23,6 +24,7 @@ const listing = (priceEur: number): Listing => ({
   fuel: "diesel",
   gearbox: "manual",
   powerKw: 110,
+  engineCc: 1968,
   body: "wagon",
   color: "plava",
   priceEur,

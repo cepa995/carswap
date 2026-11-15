@@ -3,7 +3,7 @@
 import { ChevronDown, Layers, Plus, SlidersHorizontal } from "lucide-react";
 import { AnimatePresence, motion, useMotionValue, useTransform, type MotionValue } from "motion/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { browser } from "react-dom";
 import { Wordmark } from "@/components/brand/Wordmark";
@@ -17,11 +17,22 @@ import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
 import { copy } from "@/lib/copy";
 import { dealLine, describeDeal } from "@/lib/deal-display";
-import { buildCards, buildDeck, countSwaps, nextBudgetStep, remaining, type DeckCard } from "@/lib/domain/deck";
+import {
+  buildCards,
+  buildDeck,
+  countSwaps,
+  nextSuggestion,
+  otherDirectionCount,
+  remaining,
+  type DeckCard,
+  type Direction,
+  type Suggestion,
+} from "@/lib/domain/deck";
 import type { SwipeDirection } from "@/lib/domain/types";
 import { carsCount, formatEur } from "@/lib/format";
 import { haptic } from "@/lib/haptics";
 import { springs } from "@/lib/motion";
+import { preferenceLabel } from "@/lib/preference";
 import { dealers, listings } from "@/lib/seed";
 import { useApp } from "@/lib/store";
 import { useEstimate } from "@/lib/useEstimate";
@@ -55,24 +66,49 @@ export function DeckScreen() {
 
   const car = useApp((state) => state.car);
   const budget = useApp((state) => state.budget);
+  const direction = useApp((state) => state.direction);
+  const minCash = useApp((state) => state.minCash);
   const swipes = useApp((state) => state.swipes);
   const canUndo = useApp((state) => state.history.length > 0);
   const firstMatchSeen = useApp((state) => state.firstMatchSeen);
   const swipe = useApp((state) => state.swipe);
   const undo = useApp((state) => state.undo);
   const setBudget = useApp((state) => state.setBudget);
+  const setMinCash = useApp((state) => state.setMinCash);
+  const setDirection = useApp((state) => state.setDirection);
   const restorePassed = useApp((state) => state.restorePassed);
+  const reconsider = useApp((state) => state.reconsider);
   const markFirstMatchSeen = useApp((state) => state.markFirstMatchSeen);
+
+  // A shared link opens the deck on its car. The id is kept after the address
+  // is cleaned up below, so the car stays on top until it is swiped.
+  const sharedId = useSearchParams().get("auto");
+  const [pinnedId, setPinnedId] = useState(sharedId);
+  if (sharedId && sharedId !== pinnedId) setPinnedId(sharedId);
+
+  useEffect(() => {
+    if (!sharedId) return;
+    // Somebody thought this car worth sending: show it even if it was passed before.
+    reconsider(sharedId);
+    track("shared_car_opened", { listingId: sharedId });
+    // Without the parameter, a reload does not deal the car again once it has been swiped.
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [sharedId, reconsider]);
 
   const estimate = useEstimate(car);
   const input = useMemo(() => {
-    return { listings, dealers, car, estimate, budget, currentYear };
-  }, [car, estimate, budget, currentYear]);
+    return { listings, dealers, car, estimate, budget, direction, minCash, currentYear, pinnedId };
+  }, [car, estimate, budget, direction, minCash, currentYear, pinnedId]);
 
   const allCards = useMemo(() => buildCards(input), [input]);
   const cards = useMemo(() => remaining(buildDeck(input), swipes), [input, swipes]);
-  const inBudget = useMemo(() => countSwaps(input), [input]);
-  const raise = useMemo(() => (cards.length === 0 && car ? nextBudgetStep(input) : null), [cards.length, car, input]);
+  const inPlay = useMemo(() => countSwaps(input), [input]);
+
+  // Out of cards: work out what small change would deal some more.
+  const wayOut = useMemo(() => {
+    if (cards.length > 0 || !car) return null;
+    return { suggestion: nextSuggestion(input, swipes), otherDirection: otherDirectionCount(input, swipes) };
+  }, [cards.length, car, input, swipes]);
 
   const likedCount = useMemo(() => Object.values(swipes).filter((d) => d === "like").length, [swipes]);
   const hasPassed = useMemo(() => Object.values(swipes).some((d) => d === "pass"), [swipes]);
@@ -231,8 +267,8 @@ export function DeckScreen() {
                 onClick={() => setBudgetSheetOpen(true)}
                 className="flex h-8 shrink-0 items-center gap-2 rounded-full bg-surface px-3.5 text-sm font-semibold whitespace-nowrap shadow-chip ring-1 ring-line transition duration-150 ease-out-expo hover:bg-raised active:scale-[0.97]"
               >
-                <SlidersHorizontal className="size-4 text-accent-strong" aria-hidden />
-                {budget === 0 ? copy.budget.evenSwap : copy.budget.chip(formatEur(budget))}
+                <SlidersHorizontal className="size-4 shrink-0 text-accent-strong" aria-hidden />
+                {preferenceLabel({ direction, budget, minCash })}
               </button>
             </>
           ) : (
@@ -253,7 +289,7 @@ export function DeckScreen() {
           )}
         </div>
 
-        <main className="relative min-h-0 flex-1 px-4 pt-6 pb-8">
+        <main className="relative min-h-0 flex-1 px-4 pt-6 pb-8 short:pt-4 short:pb-7">
           <div className="mx-auto h-full max-h-[42rem] w-full max-w-[26rem]">
             {cards.length > 0 ? (
               <SwipeDeck
@@ -270,10 +306,14 @@ export function DeckScreen() {
             ) : (
               <EmptyDeck
                 hasCar={car !== null}
-                raise={raise}
+                direction={direction}
+                suggestion={wayOut?.suggestion ?? null}
+                otherDirection={wayOut?.otherDirection ?? 0}
                 hasPassed={hasPassed}
                 likedCount={likedCount}
-                onRaise={setBudget}
+                onBudget={setBudget}
+                onMinCash={setMinCash}
+                onAnyDirection={() => setDirection("any")}
                 onRestore={restorePassed}
                 onAddCar={() => openCarSheet("deck")}
               />
@@ -336,16 +376,7 @@ export function DeckScreen() {
 
       <MyCarSheet open={carSheetOpen} onOpenChange={setCarSheetOpen} />
 
-      <BudgetSheet
-        open={budgetSheetOpen}
-        onOpenChange={setBudgetSheetOpen}
-        budget={budget}
-        inBudget={inBudget}
-        onBudget={(next) => {
-          setBudget(next);
-          track("budget_changed", { budget: next });
-        }}
-      />
+      <BudgetSheet open={budgetSheetOpen} onOpenChange={setBudgetSheetOpen} count={inPlay} />
 
       <MatchMoment
         card={match}
@@ -409,28 +440,72 @@ function Toast({ message }: { message: ToastMessage | null }) {
   );
 }
 
+interface WayOut {
+  key: string;
+  /** Why it is worth doing: how many more cars it deals. */
+  reason: string;
+  label: string;
+  apply: () => void;
+}
+
 function EmptyDeck({
   hasCar,
-  raise,
+  direction,
+  suggestion,
+  otherDirection,
   hasPassed,
   likedCount,
-  onRaise,
+  onBudget,
+  onMinCash,
+  onAnyDirection,
   onRestore,
   onAddCar,
 }: {
   hasCar: boolean;
-  raise: { budget: number; extra: number } | null;
+  direction: Direction;
+  /** The smallest change to the amount that deals more cars. */
+  suggestion: Suggestion | null;
+  /** How many more cars trading in either direction would deal. */
+  otherDirection: number;
   hasPassed: boolean;
   likedCount: number;
-  onRaise: (budget: number) => void;
+  onBudget: (budget: number) => void;
+  onMinCash: (minCash: number) => void;
+  onAnyDirection: () => void;
   onRestore: () => void;
   onAddCar: () => void;
 }) {
-  const body = !hasCar
-    ? copy.deck.emptyBodyNoCar
-    : raise
-      ? copy.deck.emptyRaise(formatEur(raise.budget), carsCount(raise.extra))
-      : copy.deck.emptyBodyNoMore;
+  const waysOut: WayOut[] = [];
+  if (suggestion?.kind === "raise-budget") {
+    const amount = formatEur(suggestion.budget);
+    waysOut.push({
+      key: "raise",
+      reason: copy.deck.emptyRaise(amount, carsCount(suggestion.extra)),
+      label: copy.deck.raiseTo(amount),
+      apply: () => onBudget(suggestion.budget),
+    });
+  }
+  if (suggestion?.kind === "accept-less-cash") {
+    const amount = formatEur(suggestion.minCash);
+    const cars = carsCount(suggestion.extra);
+    waysOut.push({
+      key: "less-cash",
+      reason: suggestion.minCash === 0 ? copy.deck.emptyAnyCash(cars) : copy.deck.emptyLessCash(amount, cars),
+      label: suggestion.minCash === 0 ? copy.deck.anyCashWillDo : copy.deck.lowerTo(amount),
+      apply: () => onMinCash(suggestion.minCash),
+    });
+  }
+  if (otherDirection > 0) {
+    const cars = carsCount(otherDirection);
+    waysOut.push({
+      key: "any-direction",
+      reason: direction === "up" ? copy.deck.emptyAlsoCheaper(cars) : copy.deck.emptyAlsoPricier(cars),
+      label: direction === "up" ? copy.deck.alsoCheaper : copy.deck.alsoPricier,
+      apply: onAnyDirection,
+    });
+  }
+
+  const body = !hasCar ? copy.deck.emptyBodyNoCar : (waysOut[0]?.reason ?? copy.deck.emptyBodyNoMore);
 
   return (
     <motion.div
@@ -449,9 +524,11 @@ function EmptyDeck({
 
       <div className="mt-7 flex w-full max-w-xs flex-col gap-2.5">
         {!hasCar ? <Button onClick={onAddCar}>{copy.car.add}</Button> : null}
-        {raise ? (
-          <Button onClick={() => onRaise(raise.budget)}>{copy.deck.raiseTo(formatEur(raise.budget))}</Button>
-        ) : null}
+        {waysOut.map((way, index) => (
+          <Button key={way.key} variant={index === 0 ? "primary" : "secondary"} onClick={way.apply}>
+            {way.label}
+          </Button>
+        ))}
         {hasPassed ? (
           <Button variant="secondary" onClick={onRestore}>
             {copy.deck.restorePassed}
@@ -480,7 +557,7 @@ export function DeckSkeleton() {
           <Wordmark />
         </div>
         <div className="h-12 shrink-0" />
-        <div className="min-h-0 flex-1 px-4 pb-8">
+        <div className="min-h-0 flex-1 px-4 pb-8 short:pb-7">
           <div className="mx-auto flex h-full max-h-[42rem] w-full max-w-[26rem] animate-pulse items-center justify-center rounded-card bg-surface text-sm text-fg-faint">
             {copy.deck.loading}
           </div>

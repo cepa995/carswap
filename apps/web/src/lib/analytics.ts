@@ -9,7 +9,7 @@ export interface AnalyticsEvents {
   landing_viewed: Record<string, never>;
   car_flow_opened: { source: "landing" | "deck" | "details" | "garage" };
   car_saved: { make: string; model: string; year: number };
-  budget_changed: { budget: number };
+  preference_changed: { direction: "any" | "up" | "down"; budget: number; minCash: number };
   deck_viewed: { cards: number; hasCar: boolean };
   card_swiped: {
     listingId: string;
@@ -20,6 +20,10 @@ export interface AnalyticsEvents {
   card_details_opened: { listingId: string };
   swipe_undone: { listingId: string };
   match_shown: { listingId: string; topUp: number; first: boolean };
+  share_opened: { listingId: string; source: "details" | "match"; withSwap: boolean };
+  share_sent: { listingId: string; channel: "viber" | "whatsapp" | "copy" | "native"; withSwap: boolean };
+  /** The deck was opened from a shared link, with that car dealt first. */
+  shared_car_opened: { listingId: string };
   garage_viewed: { saved: number };
   garage_item_removed: { listingId: string };
 }

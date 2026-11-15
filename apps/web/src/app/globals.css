@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* A phone browser with its address bar showing leaves about 650px of height,
+   which is what most visitors get. `short:` tightens the deck there so the
+   photo keeps its share of the card. */
+@custom-variant short (@media (max-height: 46rem));
+
 /* ─────────────────────────────────────────────────────────────────────────
    Design tokens. Three colours, each with one job:
 

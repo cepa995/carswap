@@ -1,18 +1,16 @@
 import { ImageResponse } from "next/og";
 import { brand } from "@/lib/brand";
+import { OG_FONT, OG_SIZE, ogColors, ogFonts } from "@/lib/og/fonts";
 
 export const alt = "Tvoj auto + doplata = ?";
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = "image/png";
 
-const RED = "#c2202e";
-const PAPER = "#f8f4ee";
-const INK = "#1a1512";
+const RED = ogColors.redStrong;
+const PAPER = ogColors.paper;
+const INK = ogColors.ink;
 
-/**
- * Social preview: the equation on solid red. Kept to characters the built-in
- * font is sure to have, so no font has to be fetched while it renders.
- */
+/** Social preview for the site itself: the equation on solid red, in the display face. */
 export default function OpenGraphImage() {
   return new ImageResponse(
     <div
@@ -25,9 +23,10 @@ export default function OpenGraphImage() {
         padding: 72,
         color: "#ffffff",
         background: RED,
+        fontFamily: OG_FONT,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 44, fontWeight: 700 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 44, fontWeight: 800 }}>
         <div
           style={{
             width: 64,
@@ -76,8 +75,10 @@ export default function OpenGraphImage() {
         </div>
       </div>
 
-      <div style={{ display: "flex", fontSize: 34, opacity: 0.9 }}>Zamena automobila · {brand.city}</div>
+      <div style={{ display: "flex", fontSize: 34, fontWeight: 500, opacity: 0.9 }}>
+        Zamena automobila · {brand.city}
+      </div>
     </div>,
-    size,
+    { ...size, fonts: ogFonts },
   );
 }

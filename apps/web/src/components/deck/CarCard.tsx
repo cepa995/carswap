@@ -2,6 +2,7 @@ import Image from "next/image";
 import { CarChip } from "@/components/ui/CarChip";
 import { cn } from "@/lib/cn";
 import { copy, fuelLabel, gearboxLabel } from "@/lib/copy";
+import { allIn, typicalRegistration } from "@/lib/cost-display";
 import { describeDeal, dealTone, type DealDisplay } from "@/lib/deal-display";
 import type { DeckCard } from "@/lib/domain/deck";
 import type { UserCar } from "@/lib/domain/types";
@@ -57,21 +58,24 @@ export function CarCard({ card, car, priority = false }: CarCardProps) {
         </div>
       </div>
 
-      <div className="shrink-0 p-5 pt-4">
-        <h2 className="font-display text-[1.75rem] leading-none font-bold tracking-tight text-balance">
+      <div className="shrink-0 p-5 pt-4 short:p-4 short:pt-3.5">
+        <h2 className="font-display text-[1.75rem] leading-none font-bold tracking-tight text-balance short:text-2xl short:leading-none">
           {listing.make} {listing.model}
         </h2>
         <p className="mt-1.5 truncate text-sm text-fg-muted">{listing.variant}</p>
 
-        <ul className="mt-3 flex flex-wrap gap-1.5">
+        {/* Chips where there is room. On a short screen they can wrap to a second
+            row and squeeze the photo, so there the same facts go on one line. */}
+        <ul className="mt-3 flex flex-wrap gap-1.5 short:hidden">
           {specs.map((spec) => (
             <li key={spec} className="rounded-full bg-raised px-2.5 py-1 text-[13px] font-medium tabular-nums">
               {spec}
             </li>
           ))}
         </ul>
+        <p className="mt-1 hidden truncate text-sm font-medium tabular-nums short:block">{specs.join(" · ")}</p>
 
-        <DealPanel display={display} car={car} price={listing.priceEur} />
+        <DealPanel card={card} display={display} car={car} />
       </div>
     </article>
   );
@@ -117,14 +121,74 @@ function Flag({ flag }: { flag: NonNullable<DealDisplay["flag"]> }) {
   );
 }
 
-/** The equation on every card: your car, plus this much, is this car. */
-export function DealPanel({ display, car, price }: { display: DealDisplay; car: UserCar | null; price: number }) {
+/**
+ * The equation on every card: your car, plus this much, is this car. Under it,
+ * the two figures an ad never shows: everything included on the day, and what
+ * the car then costs to keep registered.
+ */
+function DealPanel({ card, display, car }: { card: DeckCard; display: DealDisplay; car: UserCar | null }) {
+  const { listing, deal, costs } = card;
   const showsSwap = display.kind !== "price" && car !== null;
 
   return (
-    <div className="mt-4 flex items-end justify-between gap-3 rounded-3xl bg-raised p-4">
+    <div className="mt-4 rounded-3xl bg-raised p-4 short:mt-3 short:p-3.5">
+      <div className="flex items-end justify-between gap-3">
+        <DealFigure display={display} car={car} showsSwap={showsSwap} price={listing.priceEur} />
+      </div>
+      <CostCaption deal={deal} costs={costs} />
+    </div>
+  );
+}
+
+function CostCaption({ deal, costs }: Pick<DeckCard, "deal" | "costs">) {
+  const total = allIn(deal, costs);
+  const registration = formatEur(typicalRegistration(costs));
+
+  // Without a swap to total up, the one fixed cost worth a line is the tax.
+  const first = total
+    ? {
+        label: total.receives ? copy.costs.inHand : copy.costs.total,
+        value: copy.costs.approx(formatEur(total.amount)),
+      }
+    : {
+        label: copy.costs.transferTax,
+        value: costs.transferTax === 0 ? formatEur(0) : copy.costs.approx(formatEur(costs.transferTax)),
+      };
+
+  return (
+    <p className="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-t border-line pt-2.5 text-[13px] text-fg-muted tabular-nums short:mt-2.5 short:pt-2">
+      <span>
+        {first.label} <span className="font-semibold text-fg">{first.value}</span>
+      </span>
+      <span>
+        <span aria-hidden>
+          {copy.costs.registrationShort}{" "}
+          <span className="font-semibold text-fg">{copy.costs.approx(registration)}</span>
+          {copy.costs.perYearShort}
+        </span>
+        <span className="sr-only">
+          {copy.costs.registration} {copy.costs.about(registration)} {copy.costs.perYear}
+        </span>
+      </span>
+    </p>
+  );
+}
+
+function DealFigure({
+  display,
+  car,
+  showsSwap,
+  price,
+}: {
+  display: DealDisplay;
+  car: UserCar | null;
+  showsSwap: boolean;
+  price: number;
+}) {
+  return (
+    <>
       <div className="min-w-0">
-        {showsSwap ? (
+        {showsSwap && car ? (
           <div className="flex items-center gap-2 text-sm font-medium text-fg-muted">
             <CarChip className="text-[0.8rem]">{car.model}</CarChip>
             {display.kind === "top-up" ? <span className="text-xl leading-none font-semibold text-fg">+</span> : null}
@@ -137,7 +201,7 @@ export function DealPanel({ display, car, price }: { display: DealDisplay; car: 
         <div
           className={cn(
             "mt-1.5 font-display leading-none font-bold tracking-tight tabular-nums",
-            display.kind === "even" ? "text-[1.7rem]" : "text-[2.1rem]",
+            display.kind === "even" ? "text-[1.7rem] short:text-2xl" : "text-[2.1rem] short:text-[1.85rem]",
             dealTone(display),
           )}
         >
@@ -153,6 +217,6 @@ export function DealPanel({ display, car, price }: { display: DealDisplay; car: 
       ) : display.kind === "price" && car === null ? (
         <p className="max-w-[45%] shrink-0 text-right text-xs leading-snug text-fg-muted">{copy.deal.addCarHint}</p>
       ) : null}
-    </div>
+    </>
   );
 }

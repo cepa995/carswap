@@ -35,7 +35,7 @@ export function Sheet({ open, onOpenChange, title, showTitle, height = "content"
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild forceMount>
               <motion.div
-                className="fixed inset-0 z-40 bg-black/45"
+                className="fixed inset-0 z-50 bg-black/45"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

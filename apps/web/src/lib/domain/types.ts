@@ -32,6 +32,8 @@ export interface Dealer {
   /** Neighbourhood, shown next to the dealer name. */
   area: string;
   city: string;
+  /** Sells with VAT in the price, as registered dealers do. The buyer then owes no transfer tax. */
+  chargesVat: boolean;
   rules: TradeInRules;
 }
 
@@ -47,6 +49,8 @@ export interface Listing {
   fuel: Fuel;
   gearbox: Gearbox;
   powerKw: number;
+  /** Engine displacement in cm³; 0 for electric cars. Taxes and registration depend on it. */
+  engineCc: number;
   body: BodyStyle;
   color: string;
   priceEur: number;

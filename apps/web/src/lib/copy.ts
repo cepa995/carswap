@@ -16,7 +16,7 @@ export const copy = {
   meta: {
     title: "Šta tvoj auto može da postane?",
     description:
-      "Menjaj auto bez oglasa i cenkanja. Reci šta voziš i koliko možeš da doplatiš, prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
+      "Menjaj auto bez oglasa i cenkanja. Reci šta voziš, pa doplati za bolji ili uzmi jeftiniji i ponesi keš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
   },
 
   common: {
@@ -41,13 +41,27 @@ export const copy = {
     remove: "Ukloni moj auto",
   },
 
-  budget: {
-    chip: (amount: string) => `Doplata do ${amount}`,
-    title: "Doplata",
-    subtitle: "Koliko najviše dodaješ uz svoj auto?",
-    inBudget: "U tvom budžetu",
-    evenSwap: "Ključ za ključ",
-    sliderLabel: "Najveća doplata",
+  // Which way to trade, in the words of the ads: "menjam za skuplje / za jeftinije".
+  pref: {
+    title: "Šta tražiš?",
+    up: "Skuplji",
+    upHint: "ja doplaćujem",
+    down: "Jeftiniji",
+    downHint: "meni keš",
+    any: "Svejedno",
+    anyHint: "sve što može",
+    payUpTo: "Doplaćujem do",
+    getAtLeast: "Dobijam bar",
+    noTopUp: "Bez doplate",
+    anyCash: "Koliko god",
+    inPlay: "U igri",
+    chipAny: (amount: string) => `Doplata do ${amount}`,
+    chipUp: (amount: string) => `Skuplji · do ${amount}`,
+    chipDown: (amount: string) => `Jeftiniji · bar ${amount}`,
+    chipDownAny: "Jeftiniji · keš meni",
+    chipNoTopUp: "Bez doplate",
+    sliderPay: "Najveća doplata",
+    sliderCash: "Najmanje keša",
   },
 
   deal: {
@@ -55,6 +69,7 @@ export const copy = {
     priceLower: "cena",
     evenValue: "Ključ za ključ",
     cashBackSuffix: "i još dobijaš",
+    cashBackShort: (amount: string) => `dobijaš ${amount}`,
     overBudget: (amount: string) => `${amount} preko budžeta`,
     noTradeIn: "Bez zamene",
     canSwap: "Može zamena",
@@ -77,12 +92,21 @@ export const copy = {
     loading: "Mešamo karte…",
     savedToast: "Parkirano u garaži",
     matchToast: "Može zamena",
-    emptyTitleCar: "To je sve u tvom budžetu",
+    emptyTitleCar: "To je sve za tvoj izbor",
     emptyTitleNoCar: "To je sve za sada",
     emptyBodyNoCar: "Dodaj svoj auto i za svaki od njih vidiš tačnu doplatu.",
     emptyBodyNoMore: "Nova vozila stižu redovno. Navrati opet.",
-    emptyRaise: (budget: string, cars: string) => `Sa doplatom do ${budget} u igri je još ${cars}.`,
+    // "Ima još N" reads right for every count, so no verb has to agree with the number.
+    emptyRaise: (budget: string, cars: string) => `Sa doplatom do ${budget} ima još ${cars}.`,
     raiseTo: (budget: string) => `Podigni na ${budget}`,
+    emptyLessCash: (cash: string, cars: string) => `Ako pristaješ na ${cash} keša, ima još ${cars}.`,
+    emptyAnyCash: (cars: string) => `Ako ti odgovara i manje keša, ima još ${cars}.`,
+    lowerTo: (cash: string) => `Spusti na ${cash}`,
+    anyCashWillDo: "Može i manje",
+    emptyAlsoCheaper: (cars: string) => `Ima još ${cars} ako gledaš i jeftinije.`,
+    emptyAlsoPricier: (cars: string) => `Ima još ${cars} ako gledaš i skuplje.`,
+    alsoCheaper: "Pogledaj i jeftinije",
+    alsoPricier: "Pogledaj i skuplje",
     restorePassed: "Vrati preskočene",
     openGarage: "Otvori garažu",
   },
@@ -112,6 +136,64 @@ export const copy = {
     photoBy: "Foto",
   },
 
+  // What a swap costs besides the top-up. Classified ads leave this for the counter.
+  costs: {
+    // The heading over a total, and the one over the bare costs when there is no swap to total.
+    title: "Sve ukupno",
+    titleNoSwap: "Šta još plaćaš",
+    transferTax: "Porez na prenos",
+    transferTaxVat: (amount: string) =>
+      `PDV je već u ceni, pa poreza na prenos nema. Od privatnog prodavca bi bio oko ${amount}.`,
+    transferTaxPrivate: "2,5% po formuli iz zakona. Plaća ga kupac.",
+    paperwork: "Papiri",
+    paperworkNote: "Saobraćajna, tablice, nalepnica i overa ugovora.",
+    total: "Sve ukupno",
+    inHand: "Na ruke",
+    totalPay: "Plaćaš ukupno",
+    totalReceive: "Dobijaš na ruke",
+    onTheDay: "Na dan zamene.",
+    registration: "Registracija",
+    registrationYear: "Godina registracije",
+    perYear: "godišnje",
+    registrationNote: "Porez na upotrebu, obavezno osiguranje, tehnički pregled, komunalna taksa i nalepnica.",
+    about: (amount: string) => `oko ${amount}`,
+    footnote: (year: string) => `Okvirno, po tarifama za ${year}. Tačne iznose dobijaš pre potpisa.`,
+    // The card has room for a few words, so it borrows the shorthand of car ads.
+    approx: (amount: string) => `~${amount}`,
+    registrationShort: "Reg.",
+    perYearShort: "/god.",
+  },
+
+  // Sending a car to someone, mostly over Viber, with the sender's own equation in the link.
+  share: {
+    button: "Pošalji",
+    toSomeone: "Pošalji nekome",
+    title: "Pošalji auto",
+    viber: "Pošalji na Viber",
+    whatsapp: "WhatsApp",
+    copyLink: "Kopiraj link",
+    copied: "Kopirano",
+    more: "Još",
+    includes: "U linku su samo model tvog auta i iznos. Bez imena i broja telefona.",
+    includesPlain: "Šalješ samo link ka ovom autu.",
+    // The words after the equation in the message, before the link.
+    look: "Može zamena, pogledaj:",
+    cash: "keša",
+    even: "ključ za ključ",
+  },
+
+  // The page a shared link opens.
+  listing: {
+    sentBy: "Ko ti je poslao link, menja ovako:",
+    // Third person: on this page the cash goes to the sender, not to the reader.
+    senderGets: "i još dobija",
+    yours: "Za tvoj auto računica je drugačija.",
+    cta: "Vidi šta može za tvoj auto",
+    description: (specs: string, dealer: string) =>
+      `${specs}. ${dealer}. Unesi svoj auto i vidi koliko doplaćuješ ili koliko keša dobijaš.`,
+    imageAlt: "Automobil i računica zamene",
+  },
+
   wizard: {
     title: "Šta voziš?",
     searchMake: "Pretraži marke",
@@ -127,7 +209,6 @@ export const copy = {
     resultLead: "vredi oko",
     resultNote:
       "Okvirna procena prema marki, modelu, godištu, kilometraži i gorivu. Tačan iznos znaš kad auto-kuća pogleda vozilo.",
-    budgetQuestion: "Koliko možeš da doplatiš?",
     show: "Daj da vidim",
     stepOf: (step: number, total: number) => `Korak ${step} od ${total}`,
   },
@@ -155,15 +236,15 @@ export const copy = {
   landing: {
     eyebrow: (city: string) => `Zamena automobila · ${city}`,
     title: "Šta tvoj auto može da postane?",
-    lead: "Reci šta voziš i koliko možeš da doplatiš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena. Bez oglasa i bez „koja je poslednja cena?“.",
+    lead: "Reci šta voziš. Doplati za bolji ili uzmi jeftiniji pa ponesi keš. Prevuci desno šta ti se sviđa i odmah vidiš gde može zamena.",
     cta: "Kreni da prevlačiš",
     ctaCar: "Unesi svoj auto",
     equationCar: "Tvoj auto",
     equationExample: "primer",
     equationEnter: "Unesi svoj",
     equationChange: "Promeni",
-    equationTopUp: "Doplata",
     equationEmpty: "Sa ovom doplatom još nema zamene. Povuci klizač udesno.",
+    equationEmptyDown: "Za toliko keša nema zamene. Povuci klizač ulevo.",
     garage: "Garaža",
     howTitle: "Kako ide zamena",
     steps: [
@@ -173,7 +254,7 @@ export const copy = {
       },
       {
         title: "Prevlači",
-        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko doplaćuješ.",
+        body: "Desno je menjam, levo je dalje. Na svakoj kartici piše koliko doplaćuješ ili koliko keša dobijaš.",
       },
       {
         title: "Može zamena",

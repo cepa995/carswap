@@ -7,16 +7,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { MyCarSheet } from "@/components/car/MyCarSheet";
+import { SwapPreference } from "@/components/car/SwapPreference";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { Button, buttonClass } from "@/components/ui/Button";
-import { RangeSlider } from "@/components/ui/RangeSlider";
 import { track } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 import { useCurrentYear } from "@/lib/clock";
 import { copy } from "@/lib/copy";
 import { describeDeal } from "@/lib/deal-display";
-import { BUDGET_MAX, BUDGET_MIN, BUDGET_STEP, buildCards, type DeckCard } from "@/lib/domain/deck";
-import { carsWord, formatEur } from "@/lib/format";
+import { buildCards, wanted, type DeckCard } from "@/lib/domain/deck";
+import { carsWord } from "@/lib/format";
 import { springs } from "@/lib/motion";
 import { EXAMPLE_CAR } from "@/lib/reference";
 import { dealers, listings } from "@/lib/seed";
@@ -30,7 +30,8 @@ export function Hero() {
   const currentYear = useCurrentYear();
   const savedCar = useApp((state) => state.car);
   const budget = useApp((state) => state.budget);
-  const setBudget = useApp((state) => state.setBudget);
+  const direction = useApp((state) => state.direction);
+  const minCash = useApp((state) => state.minCash);
   const [carSheetOpen, setCarSheetOpen] = useState(false);
 
   const car = savedCar ?? EXAMPLE_CAR;
@@ -38,11 +39,12 @@ export function Hero() {
   const estimate = useEstimate(car);
   const swaps = useMemo(() => {
     return buildCards({ listings, dealers, car, estimate, budget, currentYear })
-      .filter((card) => card.deal.status === "swap")
+      .filter((card) => wanted(card.deal, { direction, minCash }))
       .sort((a, b) => a.listing.priceEur - b.listing.priceEur);
-  }, [car, estimate, budget, currentYear]);
+  }, [car, estimate, budget, direction, minCash, currentYear]);
 
-  // The best the budget buys: as the slider moves right, better cars arrive.
+  // The most car the choice allows: a bigger top-up brings better cars, a bigger
+  // demand for cash leaves cheaper ones.
   const fan = swaps.slice(-FAN_SIZE);
 
   useEffect(() => {
@@ -114,35 +116,8 @@ export function Hero() {
             <span className="shrink-0 text-sm font-semibold text-accent-strong">{carAction}</span>
           </button>
 
-          {/* Plus the top-up. */}
-          <div className="mt-5 flex items-baseline justify-between gap-3 px-1.5">
-            <span className="flex items-baseline gap-2 text-[15px] font-medium text-fg-muted">
-              <span aria-hidden className="font-display text-2xl leading-none font-extrabold text-fg">
-                +
-              </span>
-              {copy.landing.equationTopUp}
-            </span>
-            <span className="font-display text-[2rem] leading-none font-extrabold tracking-tight tabular-nums sm:text-4xl">
-              {budget === 0 ? (
-                copy.budget.evenSwap
-              ) : (
-                <>
-                  <AnimatedNumber value={budget} /> €
-                </>
-              )}
-            </span>
-          </div>
-
-          <RangeSlider
-            className="mt-1"
-            value={budget}
-            min={BUDGET_MIN}
-            max={BUDGET_MAX}
-            step={BUDGET_STEP}
-            onChange={setBudget}
-            label={copy.budget.sliderLabel}
-            valueText={formatEur(budget)}
-          />
+          {/* Which way to trade, and how much money is in play. */}
+          <SwapPreference className="mt-3" />
 
           {/* Equals this many cars. */}
           <p className="mt-1 flex items-baseline gap-2 px-1.5">
@@ -154,7 +129,10 @@ export function Hero() {
             </span>
           </p>
 
-          <Fan cards={fan} />
+          <Fan
+            cards={fan}
+            emptyText={direction === "down" ? copy.landing.equationEmptyDown : copy.landing.equationEmpty}
+          />
 
           <Link
             href="/swipe"
@@ -183,7 +161,7 @@ const FAN_SLOTS = [0, 1, -1, 2, -2];
  * Up to five cars the equation produces, held like a hand of cards. The best
  * one the budget buys is in front with its top-up; the rest peek out behind.
  */
-function Fan({ cards }: { cards: DeckCard[] }) {
+function Fan({ cards, emptyText }: { cards: DeckCard[]; emptyText: string }) {
   const reduceMotion = useReducedMotion();
   const count = cards.length;
   // `cards` is cheapest first; rank 0 is the most car for the money.
@@ -222,8 +200,11 @@ function Fan({ cards }: { cards: DeckCard[] }) {
                       {card.listing.make} {card.listing.model}
                     </p>
                     <p className="mt-0.5 font-display text-base leading-none font-bold tabular-nums">
-                      {display.kind === "top-up" ? "+ " : ""}
-                      {display.value}
+                      {display.kind === "top-up"
+                        ? `+ ${display.value}`
+                        : display.kind === "cash-back"
+                          ? copy.deal.cashBackShort(display.value)
+                          : display.value}
                     </p>
                   </div>
                 ) : (
@@ -237,7 +218,7 @@ function Fan({ cards }: { cards: DeckCard[] }) {
 
       {count === 0 ? (
         <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-fg-muted">
-          {copy.landing.equationEmpty}
+          {emptyText}
         </p>
       ) : null}
     </div>

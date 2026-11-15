@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { DEFAULT_BUDGET } from "@/lib/domain/deck";
+import { DEFAULT_BUDGET, type Direction } from "@/lib/domain/deck";
 import type { SwipeDirection, UserCar } from "@/lib/domain/types";
 
 /**
@@ -11,15 +11,21 @@ import type { SwipeDirection, UserCar } from "@/lib/domain/types";
  */
 interface AppState {
   car: UserCar | null;
+  /** Trading up, trading down, or happy with either. */
+  direction: Direction;
   /** Most the visitor will add on top of their car, in EUR. */
   budget: number;
+  /** When trading down: the least cash back that makes it worth it, in EUR. */
+  minCash: number;
   swipes: Record<string, SwipeDirection>;
   /** Listing ids in the order they were swiped, for undo and garage order. */
   history: string[];
   firstMatchSeen: boolean;
 
   setCar: (car: UserCar | null) => void;
+  setDirection: (direction: Direction) => void;
   setBudget: (budget: number) => void;
+  setMinCash: (minCash: number) => void;
   swipe: (listingId: string, direction: SwipeDirection) => void;
   /** Takes back the latest swipe and returns its listing id. */
   undo: () => string | null;
@@ -27,6 +33,8 @@ interface AppState {
   removeFromGarage: (listingId: string) => void;
   /** Puts every passed car back in the deck. */
   restorePassed: () => void;
+  /** Puts one passed car back in the deck, e.g. when someone sends a link to it. A liked car stays liked. */
+  reconsider: (listingId: string) => void;
   markFirstMatchSeen: () => void;
 }
 
@@ -34,13 +42,17 @@ export const useApp = create<AppState>()(
   persist(
     (set, get) => ({
       car: null,
+      direction: "any",
       budget: DEFAULT_BUDGET,
+      minCash: 0,
       swipes: {},
       history: [],
       firstMatchSeen: false,
 
       setCar: (car) => set({ car }),
+      setDirection: (direction) => set({ direction }),
       setBudget: (budget) => set({ budget }),
+      setMinCash: (minCash) => set({ minCash }),
 
       swipe: (listingId, direction) =>
         set((state) => ({
@@ -70,15 +82,25 @@ export const useApp = create<AppState>()(
           };
         }),
 
+      reconsider: (listingId) =>
+        set((state) => {
+          if (state.swipes[listingId] !== "pass") return state;
+          const swipes = { ...state.swipes };
+          delete swipes[listingId];
+          return { swipes, history: state.history.filter((id) => id !== listingId) };
+        }),
+
       markFirstMatchSeen: () => set({ firstMatchSeen: true }),
     }),
     {
       name: "carswap:v1",
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      partialize: ({ car, budget, swipes, history, firstMatchSeen }) => ({
+      partialize: ({ car, direction, budget, minCash, swipes, history, firstMatchSeen }) => ({
         car,
+        direction,
         budget,
+        minCash,
         swipes,
         history,
         firstMatchSeen,

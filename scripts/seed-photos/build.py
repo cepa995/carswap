@@ -4,6 +4,7 @@ Reads `manifest.json` (one entry per demo car: the Commons file plus its author
 and licence) and writes:
 
 - apps/web/public/seed/cars/<id>.webp     the photo, resized
+- apps/web/assets/share-photos/<id>.jpg   a small JPEG crop for link-preview images
 - apps/web/src/lib/seed/photos.json       size, blur backdrop and credit per car
 - apps/web/public/seed/ATTRIBUTION.md     author, licence and source for every photo
 
@@ -26,12 +27,13 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 CACHE = HERE / ".cache"
 OUT_IMAGES = ROOT / "apps/web/public/seed/cars"
+OUT_SHARE = ROOT / "apps/web/assets/share-photos"
 OUT_JSON = ROOT / "apps/web/src/lib/seed/photos.json"
 OUT_ATTRIBUTION = ROOT / "apps/web/public/seed/ATTRIBUTION.md"
 
@@ -42,6 +44,10 @@ PAUSE_SECONDS = 2.0
 FETCH_WIDTH = 1920
 OUTPUT_WIDTH = 1280
 WEBP_QUALITY = 78
+# The renderer behind link previews reads JPEG and PNG, not WebP, and the photo
+# sits in a 3:2 box there. Small on purpose: the preview is re-encoded as PNG.
+SHARE_SIZE = (600, 400)
+SHARE_QUALITY = 76
 BACKDROP_SIZE = (96, 64)
 # On the 2x intermediate. High enough that street furniture and skylines melt into broad zones of colour.
 BACKDROP_BLUR = 28
@@ -111,14 +117,16 @@ def backdrop_data_url(image: Image.Image) -> str:
 def main() -> None:
     manifest = json.loads((HERE / "manifest.json").read_text(encoding="utf-8"))
     OUT_IMAGES.mkdir(parents=True, exist_ok=True)
+    OUT_SHARE.mkdir(parents=True, exist_ok=True)
 
     photos: dict[str, dict] = {}
     lines = [
         "# Photo credits",
         "",
         "Demo listing photos come from Wikimedia Commons. Each file was resized and",
-        "re-encoded as WebP; nothing else was changed. The licences below apply to",
-        "the photos, not to the rest of this repository.",
+        "re-encoded as WebP; nothing else was changed. Link-preview images use a",
+        "smaller JPEG copy of the same photo, cropped to 3:2, and print its credit.",
+        "The licences below apply to the photos, not to the rest of this repository.",
         "",
         "| File | Author | Licence | Source |",
         "| --- | --- | --- | --- |",
@@ -131,6 +139,9 @@ def main() -> None:
             image = image.resize((OUTPUT_WIDTH, height), Image.LANCZOS)
         target = OUT_IMAGES / f"{entry['id']}.webp"
         image.save(target, "WEBP", quality=WEBP_QUALITY, method=6)
+        ImageOps.fit(image, SHARE_SIZE, Image.LANCZOS).save(
+            OUT_SHARE / f"{entry['id']}.jpg", "JPEG", quality=SHARE_QUALITY, optimize=True
+        )
 
         photos[entry["id"]] = {
             "src": f"/seed/cars/{entry['id']}.webp",

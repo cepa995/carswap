@@ -1,8 +1,9 @@
 # Photo credits
 
 Demo listing photos come from Wikimedia Commons. Each file was resized and
-re-encoded as WebP; nothing else was changed. The licences below apply to
-the photos, not to the rest of this repository.
+re-encoded as WebP; nothing else was changed. Link-preview images use a
+smaller JPEG copy of the same photo, cropped to 3:2, and print its credit.
+The licences below apply to the photos, not to the rest of this repository.
 
 | File | Author | Licence | Source |
 | --- | --- | --- | --- |

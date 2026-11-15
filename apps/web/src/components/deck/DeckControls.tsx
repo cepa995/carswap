@@ -24,6 +24,8 @@ const small =
 /**
  * The two decisions are spelled out, not left to icons: not everyone arriving
  * from an ad has used a swipe app, and "Menjam" is the word they would use.
+ * On the narrowest phones there is room for the word or the icon, not both,
+ * and the word wins.
  */
 export function DeckControls({
   intent,
@@ -53,7 +55,7 @@ export function DeckControls({
           disabled={!hasCard}
           className="flex h-14 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-surface text-base font-semibold text-fg shadow-float ring-1 ring-line-strong hover:bg-raised disabled:pointer-events-none disabled:opacity-35"
         >
-          <X className="size-5" strokeWidth={3} aria-hidden />
+          <X className="size-5 max-[22rem]:hidden" strokeWidth={3} aria-hidden />
           {copy.deck.pass}
         </motion.button>
 
@@ -76,7 +78,7 @@ export function DeckControls({
             disabled={!hasCard}
             className="relative flex h-14 w-full items-center justify-center gap-2 rounded-full bg-accent text-base font-semibold text-on-accent shadow-accent hover:bg-accent-strong disabled:pointer-events-none disabled:opacity-35"
           >
-            <Heart className="size-5 fill-current" strokeWidth={2} aria-hidden />
+            <Heart className="size-5 fill-current max-[22rem]:hidden" strokeWidth={2} aria-hidden />
             {copy.deck.like}
           </motion.button>
         </div>

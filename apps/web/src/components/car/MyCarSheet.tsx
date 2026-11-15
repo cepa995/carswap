@@ -12,14 +12,15 @@ import { track } from "@/lib/analytics";
 import { useCurrentYear } from "@/lib/clock";
 import { cn } from "@/lib/cn";
 import { copy, fuelLabel } from "@/lib/copy";
-import { BUDGET_MAX, BUDGET_MIN, BUDGET_STEP, countSwaps } from "@/lib/domain/deck";
+import { countSwaps } from "@/lib/domain/deck";
 import type { Fuel, UserCar } from "@/lib/domain/types";
 import { typicalKm } from "@/lib/domain/valuation";
-import { carsCount, formatEur, formatInt, formatKm } from "@/lib/format";
+import { formatInt, formatKm } from "@/lib/format";
 import { catalog } from "@/lib/seed/catalog";
 import { dealers, listings } from "@/lib/seed";
 import { useApp } from "@/lib/store";
 import { useEstimate } from "@/lib/useEstimate";
+import { SwapPreference } from "./SwapPreference";
 
 const OLDEST_YEAR = 1995;
 const KM_MAX = 400_000;
@@ -383,12 +384,13 @@ function ResultStep({
   onRemove: () => void;
 }) {
   const budget = useApp((state) => state.budget);
-  const setBudget = useApp((state) => state.setBudget);
+  const direction = useApp((state) => state.direction);
+  const minCash = useApp((state) => state.minCash);
 
   const estimate = useEstimate(car);
-  const inBudget = useMemo(
-    () => countSwaps({ listings, dealers, car, estimate, budget, currentYear }),
-    [car, estimate, budget, currentYear],
+  const inPlay = useMemo(
+    () => countSwaps({ listings, dealers, car, estimate, budget, direction, minCash, currentYear }),
+    [car, estimate, budget, direction, minCash, currentYear],
   );
 
   // There is always an estimate for a car; the check is for the type's sake.
@@ -412,25 +414,9 @@ function ResultStep({
         </p>
         <p className="mt-3 text-[13px] leading-relaxed text-fg-faint">{copy.wizard.resultNote}</p>
 
-        <div className="mt-7 rounded-3xl bg-raised p-5 ring-1 ring-line ring-inset">
-          <p className="text-sm font-medium text-fg-muted">{copy.wizard.budgetQuestion}</p>
-          <p className="mt-1 font-display text-4xl leading-none font-bold tracking-tight tabular-nums">
-            {budget === 0 ? copy.budget.evenSwap : formatEur(budget)}
-          </p>
-          <RangeSlider
-            className="mt-3"
-            value={budget}
-            min={BUDGET_MIN}
-            max={BUDGET_MAX}
-            step={BUDGET_STEP}
-            onChange={setBudget}
-            label={copy.budget.sliderLabel}
-            valueText={formatEur(budget)}
-          />
-          <p className="mt-2 flex items-baseline justify-between text-sm text-fg-muted">
-            <span>{copy.budget.inBudget}</span>
-            <span className="font-display text-lg font-bold text-fg">{carsCount(inBudget)}</span>
-          </p>
+        <div className="mt-6 border-t border-line pt-5">
+          <h3 className="font-display text-xl leading-none font-bold tracking-tight">{copy.pref.title}</h3>
+          <SwapPreference className="mt-3" count={inPlay} />
         </div>
 
         <div className="mt-4 flex justify-center gap-1 pb-4 text-sm">

@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeftRight } from "lucide-react";
+import { ArrowLeftRight, Send } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { Dialog } from "radix-ui";
 import { useState } from "react";
+import { ShareButton } from "@/components/share/ShareButton";
 import { Button } from "@/components/ui/Button";
 import { CarChip } from "@/components/ui/CarChip";
 import { copy } from "@/lib/copy";
@@ -164,6 +165,16 @@ export function MatchMoment({ card, car, onContinue, onOpenGarage }: MatchMoment
                   <Button size="lg" variant="outline" onClick={onOpenGarage}>
                     {copy.match.openGarage}
                   </Button>
+                  {/* The moment someone most wants to show this to somebody. */}
+                  <ShareButton
+                    card={shown}
+                    car={car}
+                    source="match"
+                    className="mx-auto mt-1 flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-fg hover:bg-fg/10"
+                  >
+                    <Send className="size-4" aria-hidden />
+                    {copy.share.toSomeone}
+                  </ShareButton>
                 </motion.div>
               </motion.div>
             </Dialog.Content>

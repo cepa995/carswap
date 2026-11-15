@@ -1,11 +1,14 @@
 "use client";
 
+import { Send } from "lucide-react";
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
+import { CostBreakdown, DetailRow } from "@/components/car/CostBreakdown";
+import { ShareButton } from "@/components/share/ShareButton";
 import { CarChip } from "@/components/ui/CarChip";
 import { Sheet } from "@/components/ui/Sheet";
-import { cn } from "@/lib/cn";
 import { bodyLabel, copy, fuelLabel, gearboxLabel } from "@/lib/copy";
+import { allIn } from "@/lib/cost-display";
 import { dealTone, describeDeal } from "@/lib/deal-display";
 import type { DeckCard } from "@/lib/domain/deck";
 import type { UserCar } from "@/lib/domain/types";
@@ -43,8 +46,9 @@ export function DetailsSheet({ card, car, onClose, onAddCar, actions }: DetailsS
 }
 
 function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card" | "onClose"> & { card: DeckCard }) {
-  const { listing, dealer, deal } = card;
+  const { listing, dealer, deal, costs } = card;
   const display = describeDeal(deal, listing);
+  const total = allIn(deal, costs);
   const credit = listing.photo.credit;
 
   const specs: Array<[string, string]> = [
@@ -71,6 +75,15 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
             sizes="(max-width: 30rem) 100vw, 28rem"
             className="object-cover"
           />
+          <ShareButton
+            card={card}
+            car={car}
+            source="details"
+            className="absolute top-3 right-3 flex h-10 items-center gap-2 rounded-full bg-white/90 pr-4 pl-3.5 text-sm font-semibold text-chip-ink shadow-chip ring-1 ring-black/[0.06] transition duration-150 ease-out-expo hover:bg-white active:scale-[0.97]"
+          >
+            <Send className="size-4 text-accent-strong" aria-hidden />
+            {copy.share.button}
+          </ShareButton>
         </div>
 
         <div className="mt-5 flex items-start justify-between gap-4">
@@ -106,8 +119,8 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
             </p>
           ) : (
             <div className="rounded-2xl bg-raised p-4">
-              <Row label={copy.details.listingPrice} value={formatEur(listing.priceEur)} />
-              <Row
+              <DetailRow label={copy.details.listingPrice} value={formatEur(listing.priceEur)} />
+              <DetailRow
                 label={
                   <span className="flex items-center gap-2">
                     {copy.details.yourCarCredit}
@@ -117,7 +130,7 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
                 value={`− ${formatEur(deal.credit)}`}
               />
               <div className="my-3 h-px bg-line" />
-              <Row
+              <DetailRow
                 strong
                 label={display.kind === "cash-back" ? copy.details.cashBack : copy.details.topUp}
                 value={display.value}
@@ -131,6 +144,22 @@ function Details({ card, car, onAddCar, actions }: Omit<DetailsSheetProps, "card
               </p>
             </div>
           )}
+        </Section>
+
+        <Section title={total ? copy.costs.title : copy.costs.titleNoSwap}>
+          <CostBreakdown
+            costs={costs}
+            chargesVat={dealer.chargesVat}
+            total={total}
+            swapLine={
+              display.kind === "top-up" || display.kind === "cash-back"
+                ? {
+                    label: display.kind === "cash-back" ? copy.details.cashBack : copy.details.topUp,
+                    value: display.value,
+                  }
+                : null
+            }
+          />
         </Section>
 
         <Section title={copy.details.specsTitle}>
@@ -193,32 +222,5 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h3 className="mb-2.5 text-xs font-semibold tracking-wider text-fg-faint uppercase">{title}</h3>
       {children}
     </section>
-  );
-}
-
-function Row({
-  label,
-  value,
-  strong,
-  valueClassName,
-}: {
-  label: ReactNode;
-  value: string;
-  strong?: boolean;
-  valueClassName?: string;
-}) {
-  return (
-    <div className={cn("flex items-center justify-between gap-3 py-1", strong ? "text-fg" : "text-sm text-fg-muted")}>
-      <span className={cn(strong && "font-semibold")}>{label}</span>
-      <span
-        className={cn(
-          "tabular-nums",
-          strong ? "font-display text-2xl font-bold tracking-tight" : "font-medium text-fg",
-          valueClassName,
-        )}
-      >
-        {value}
-      </span>
-    </div>
   );
 }
